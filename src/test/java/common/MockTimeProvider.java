@@ -7,10 +7,12 @@ import java.time.ZonedDateTime;
 public class MockTimeProvider implements TimeProvider {
 
     long currentTime;
+
     public MockTimeProvider() {
         LocalDateTime currentDate = LocalDateTime.now();
         // Convert to milliseconds since epoch
         ZonedDateTime zonedDateTime = currentDate.atZone(ZoneId.systemDefault());
+        //stamp the current time when create
         currentTime = zonedDateTime.toInstant().toEpochMilli();
     }
 
