@@ -41,12 +41,12 @@ class VwapIndicatorTest {
         // add one price that within 1 hour
         mockTimeProvider.advanceInMinutes(-1);
         Price newData = new Price("AUD/USD", mockTimeProvider.now(), 10.4, 12000);
-        vwap = indicator.calculateWithDelta(newData, 60);
+        vwap = indicator.calculateWithDelta(newData);
         assertEquals(11.204545454545455, vwap);
 
         mockTimeProvider.advanceInMinutes(2);
         newData = new Price("AUD/USD", mockTimeProvider.now(), 10.4, 12000);
-        vwap = indicator.calculateWithDelta(newData, 60);
+        vwap = indicator.calculateWithDelta(newData);
         assertEquals(10.977777777777778, vwap);
     }
 

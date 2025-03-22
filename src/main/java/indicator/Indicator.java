@@ -6,5 +6,5 @@ import java.util.List;
 
 public interface Indicator {
     double calculate(List<Price> priceData);
-    double calculateWithDelta(Price newData, long timeLengthInMin);
+    double calculateWithDelta(Price newData);
 }

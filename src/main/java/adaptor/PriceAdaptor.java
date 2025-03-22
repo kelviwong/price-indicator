@@ -8,11 +8,12 @@ import feeder.PriceFeeder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import publisher.Publisher;
+import service.IService;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class PriceAdaptor {
+public class PriceAdaptor implements IService {
     private final ExecutorService executorService;
     FeedHandler<String> feedHandler;
     Publisher<PriceEvent> publisher;

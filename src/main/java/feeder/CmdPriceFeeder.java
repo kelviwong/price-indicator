@@ -2,9 +2,11 @@ package feeder;
 
 import java.util.concurrent.ArrayBlockingQueue;
 
-public class SimulatePriceFeeder implements PriceFeeder<String> {
+public class CmdPriceFeeder implements PriceFeeder<String>{
+
     ArrayBlockingQueue<String> queue = new ArrayBlockingQueue<>(10000);
 
+    @Override
     public String getData() throws InterruptedException {
         return queue.take();
     }

@@ -13,6 +13,7 @@ public class VwapIndicator implements Indicator {
     ArrayDeque<Price> storedPrice = new ArrayDeque<>();
 
     TimeProvider timeProvider;
+    private final static int timeLengthInMin = 60;
 
     public VwapIndicator(TimeProvider timeProvider) {
         this.timeProvider = timeProvider;
@@ -39,17 +40,13 @@ public class VwapIndicator implements Indicator {
         return accumulatePriceVol / totalVol;
     }
 
-//    public void onPriceUpdate(Price newData) {
-//        double vwap = calculateWithDelta(newData, 60);
-//
-//    }
-
-    public double calculateWithDelta(Price newData, long timeLengthInMin) {
+    public double calculateWithDelta(Price newData) {
         Price data = storedPrice.peek();
-        long now = timeProvider.now();
-        long epochMilli = now - timeLengthInMin * 60 * 1000;
 
-        while (data.getTimestamp() < epochMilli) {
+        long now = timeProvider.now();
+        long epochMilli = now - timeLengthInMin * 60 * 1000L;
+
+        while (data != null && data.getTimestamp() < epochMilli) {
             Price oldData = storedPrice.pop();
             previousTotalVol -= oldData.getVolume();
             previousPriceVol -= oldData.getVolume() * oldData.getPrice();
