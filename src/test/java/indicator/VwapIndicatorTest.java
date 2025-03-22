@@ -1,5 +1,6 @@
 package indicator;
 
+import common.MockTimeProvider;
 import data.Price;
 import org.junit.jupiter.api.Test;
 

@@ -1,6 +1,4 @@
-package indicator;
-
-import common.TimeProvider;
+package common;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;

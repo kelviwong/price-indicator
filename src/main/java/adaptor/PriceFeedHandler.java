@@ -4,9 +4,10 @@ import data.Price;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 public class PriceFeedHandler implements FeedHandler<String> {
-    DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("h:mm a");
+    DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("h:mm a", Locale.ENGLISH);
     final StringBuilder sb = new StringBuilder();
 
     //The price feed data should be
@@ -44,7 +45,7 @@ public class PriceFeedHandler implements FeedHandler<String> {
 
     private long parseTime(String feed) {
         // Parse the time string
-        LocalTime localTime = LocalTime.parse(feed, timeFormatter);
+        LocalTime localTime = LocalTime.parse(feed.trim(), timeFormatter);
 
         // Combine with the current date
         LocalDate currentDate = LocalDate.now();

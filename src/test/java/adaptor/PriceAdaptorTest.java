@@ -13,7 +13,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class PriceAdaptorTest {
     @Mock
-    Publisher publisher;
+    Publisher<PriceEvent> publisher;
 
     @Test
     public void testFeedHaveDataThenPricePublish() throws Exception {
@@ -23,8 +23,9 @@ class PriceAdaptorTest {
         priceAdaptor.start();
         String data = "9:30 AM;AUD/USD;0.6905;106,198";
         priceFeeder.pushData(data);
-        Thread.sleep(1);
+        Thread.sleep(10);
         verify(publisher, times(1)).publish(any(PriceEvent.class));
+        priceAdaptor.stop();
     }
 
 }
