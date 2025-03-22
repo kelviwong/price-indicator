@@ -1,5 +1,6 @@
 package adaptor;
 
+import common.NamedThreadFactory;
 import data.Price;
 import data.PriceEvent;
 import feeder.PriceFeeder;
@@ -12,25 +13,25 @@ import java.util.concurrent.Executors;
 
 public class PriceAdaptor {
     private final ExecutorService executorService;
-    FeedHandler feedHandler;
-    Publisher publisher;
-    PriceFeeder feeder;
+    FeedHandler<String> feedHandler;
+    Publisher<PriceEvent> publisher;
+    PriceFeeder<String> feeder;
 
     volatile boolean isStop;
 
     private static final Logger logger = LoggerFactory.getLogger(PriceAdaptor.class);
-    public PriceAdaptor(FeedHandler feedHandler, Publisher publisher, PriceFeeder feeder) {
+    public PriceAdaptor(FeedHandler<String> feedHandler, Publisher<PriceEvent> publisher, PriceFeeder<String> feeder) {
         this.feedHandler = feedHandler;
         this.publisher = publisher;
         this.feeder = feeder;
         this.isStop = false;
 
-        executorService = Executors.newSingleThreadExecutor();
+        executorService = Executors.newSingleThreadExecutor(new NamedThreadFactory("PriceAdaptor"));
     }
 
     public void process() throws Exception {
         while (!isStop) {
-            Object data = feeder.getData();
+            String data = feeder.getData();
             Price price = feedHandler.process(data);
             PriceEvent event = new PriceEvent(price);
             publisher.publish(event);
