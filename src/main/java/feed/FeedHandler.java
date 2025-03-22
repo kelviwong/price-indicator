@@ -1,4 +1,4 @@
-package adaptor;
+package feed;
 
 import data.Price;
 

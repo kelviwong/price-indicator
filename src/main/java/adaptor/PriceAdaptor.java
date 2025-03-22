@@ -3,6 +3,7 @@ package adaptor;
 import common.NamedThreadFactory;
 import data.Price;
 import data.PriceEvent;
+import feed.FeedHandler;
 import feeder.PriceFeeder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

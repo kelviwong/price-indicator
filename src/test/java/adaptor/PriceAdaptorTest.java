@@ -1,6 +1,7 @@
 package adaptor;
 
 import data.PriceEvent;
+import feed.PriceFeedHandler;
 import feeder.SimulatePriceFeeder;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
