@@ -4,7 +4,7 @@ import data.PriceEvent;
 
 import java.util.concurrent.ArrayBlockingQueue;
 
-public class PricePublisher implements Publisher<PriceEvent>{
+public class PricePublisher implements Publisher<PriceEvent> {
 
     ArrayBlockingQueue<PriceEvent> queue;
 
