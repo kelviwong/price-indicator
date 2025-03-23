@@ -1,15 +1,17 @@
 package indicator;
 
 import common.MockTimeProvider;
+import data.AnalyticData;
 import data.Price;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class VwapIndicatorTest {
+class VwapCalculatorTest {
     private static void setupData(List<Price> priceList, MockTimeProvider mockTimeProvider) {
         mockTimeProvider.advanceInMinutes(-61);
         priceList.add(new Price("AUD/USD", mockTimeProvider.now(), 12.5, 2000));
@@ -33,20 +35,23 @@ class VwapIndicatorTest {
     @Test
     public void testVwapPrice() {
         MockTimeProvider mockTimeProvider = new MockTimeProvider();
-        Indicator indicator = new VwapIndicator(mockTimeProvider);
+        ArrayDeque<Price> deque = new ArrayDeque<>();
+        Calculator calculator = new VwapCalculator(mockTimeProvider);
+        AnalyticData analyticData = new AnalyticData("AUD/USD");
         List<Price> priceList = setupData(mockTimeProvider);
-        double vwap = indicator.calculate(priceList);
+        deque.addAll(priceList);
+        double vwap = calculator.calculate(priceList, deque, analyticData);
         assertEquals(11.50625, vwap);
 
         // add one price that within 1 hour
         mockTimeProvider.advanceInMinutes(-1);
         Price newData = new Price("AUD/USD", mockTimeProvider.now(), 10.4, 12000);
-        vwap = indicator.calculateWithDelta(newData);
+        vwap = calculator.calculateWithDelta(newData, deque, analyticData);
         assertEquals(11.204545454545455, vwap);
 
         mockTimeProvider.advanceInMinutes(2);
         newData = new Price("AUD/USD", mockTimeProvider.now(), 10.4, 12000);
-        vwap = indicator.calculateWithDelta(newData);
+        vwap = calculator.calculateWithDelta(newData, deque, analyticData);
         assertEquals(10.977777777777778, vwap);
     }
 

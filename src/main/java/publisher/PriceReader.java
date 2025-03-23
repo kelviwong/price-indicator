@@ -1,17 +1,15 @@
 package publisher;
 
-import data.PriceEvent;
-
 import java.util.concurrent.ArrayBlockingQueue;
 
-public class PriceReader {
-    ArrayBlockingQueue<PriceEvent> queue;
+public class PriceReader<T> {
+    ArrayBlockingQueue<T> queue;
 
-    public PriceReader(ArrayBlockingQueue<PriceEvent> queue) {
+    public PriceReader(ArrayBlockingQueue<T> queue) {
         this.queue = queue;
     }
 
-    public PriceEvent poll() throws InterruptedException {
+    public T poll() throws InterruptedException {
         return queue.take();
     }
 }

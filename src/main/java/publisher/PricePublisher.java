@@ -1,19 +1,16 @@
 package publisher;
 
-import data.PriceEvent;
-
 import java.util.concurrent.ArrayBlockingQueue;
 
-public class PricePublisher implements Publisher<PriceEvent> {
+public class PricePublisher<T> implements Publisher<T> {
 
-    ArrayBlockingQueue<PriceEvent> queue;
+    ArrayBlockingQueue<T> queue;
 
-    public PricePublisher(ArrayBlockingQueue<PriceEvent> queue) {
+    public PricePublisher(ArrayBlockingQueue<T> queue) {
         this.queue = queue;
     }
-
     @Override
-    public void publish(PriceEvent data) {
+    public void publish(T data) {
         queue.offer(data);
     }
 }
