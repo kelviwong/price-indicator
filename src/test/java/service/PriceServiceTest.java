@@ -11,58 +11,79 @@ import storage.PriceStoreFactory;
 import storage.StoreType;
 import util.MockPriceEventPublisher;
 
-import javax.swing.plaf.synth.SynthRadioButtonMenuItemUI;
 import java.util.concurrent.ArrayBlockingQueue;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static util.Data.setup59MinutesOldData;
 
 class PriceServiceTest {
-
-    private static void setupData(PricePublisher<PriceEvent> publisher, MockTimeProvider mockTimeProvider, String currency, double adjustPrice) throws InterruptedException {
-        mockTimeProvider.advanceInMinutes(-59);
-        mockTimeProvider.showCurrentTime();
-        publisher.publish(new PriceEvent(new Price(currency, mockTimeProvider.now(), 12.5 + adjustPrice, 2000)));
-        mockTimeProvider.advanceInMinutes(5);
-        publisher.publish(new PriceEvent(new Price(currency, mockTimeProvider.now(), 10.5 + adjustPrice, 1000)));
-        mockTimeProvider.advanceInMinutes(10);
-        publisher.publish(new PriceEvent(new Price(currency, mockTimeProvider.now(), 14.6 + adjustPrice, 4000)));
-        mockTimeProvider.advanceInMinutes(20);
-        publisher.publish(new PriceEvent(new Price(currency, mockTimeProvider.now(), 11.5 + adjustPrice, 13000)));
-        mockTimeProvider.advanceInMinutes(20);
-        publisher.publish(new PriceEvent(new Price(currency, mockTimeProvider.now(), 10.4 + adjustPrice, 12000)));
-        mockTimeProvider.advanceInMinutes(4);
-        mockTimeProvider.showCurrentTime();
+    @Test
+    public void testPriceServiceWhenMultipleCurrencyInDeque() throws InterruptedException {
+        testPriceServiceWhenMultipleCurrency(StoreType.DEQUE);
     }
 
     @Test
-    public void testPriceServiceWhenMultipleCurrency() throws InterruptedException {
-        testPriceServiceWhenMultipleCurrency(StoreType.DEQUE);
+    public void testPriceServiceWhenMultipleCurrencyInMMF() throws InterruptedException {
         testPriceServiceWhenMultipleCurrency(StoreType.MEM_MAP);
     }
 
     public void testPriceServiceWhenMultipleCurrency(StoreType storeType) throws InterruptedException {
         ArrayBlockingQueue<IndicatorEvent> indicatorEventArrayBlockingQueue = new ArrayBlockingQueue<>(10000);
         ArrayBlockingQueue<PriceEvent> priceEventArrayBlockingQueue = new ArrayBlockingQueue<>(10000);
-        MockPriceEventPublisher<IndicatorEvent> publisher = new MockPriceEventPublisher(indicatorEventArrayBlockingQueue);
+        MockPriceEventPublisher<IndicatorEvent> publisher = new MockPriceEventPublisher<>(indicatorEventArrayBlockingQueue);
         MockTimeProvider timeProvider = new MockTimeProvider();
         timeProvider.setCurrentTime("10:00:00");
-        timeProvider.showCurrentTime();
+        assertEquals("10:00:00", timeProvider.getCurrentTime());
 
         PricePublisher<PriceEvent> ignessPublisher = new PricePublisher<>(priceEventArrayBlockingQueue);
-        PriceReader priceReader = new PriceReader(priceEventArrayBlockingQueue);
+        PriceReader<PriceEvent> priceReader = new PriceReader<>(priceEventArrayBlockingQueue);
         PriceStoreFactory priceStoreFactory = new PriceStoreFactory(storeType, "test2");
         PriceService priceService = new PriceService(priceReader, timeProvider, publisher, priceStoreFactory);
         priceService.start();
-        setupData(ignessPublisher, timeProvider, "AUD/USD", 0.0d);
-        Thread.sleep(5);
-        assertEquals("AUD/USD", publisher.getLastEvent().getData().getCurrency());
-        assertEquals(11.50625, publisher.getLastEvent().getData().getVwap());
+        String currency = "AUD/USD";
 
-        // calculate another currency pair
-        setupData(ignessPublisher, timeProvider, "JPY/USD", 0.423);
-        Thread.sleep(5);
-        assertEquals("JPY/USD", publisher.getLastEvent().getData().getCurrency());
-        assertEquals(11.92925, publisher.getLastEvent().getData().getVwap());
+        timeProvider.advanceInMinutes(-59);
+        assertEquals("09:01:00", timeProvider.getCurrentTime());
+        setup59MinutesOldData(ignessPublisher, timeProvider, currency, 0.0d);
+        assertEquals("10:00:00", timeProvider.getCurrentTime());
+
+        // nothing publish as there are no 1 hour long data
+        assertNull(publisher.getLastEvent());
+
+        // after 1 minutes reach 1 hour
+        timeProvider.advanceInMinutes(1);
+        assertEquals("10:01:00", timeProvider.getCurrentTime());
+        ignessPublisher.publish(new PriceEvent(new Price(currency, timeProvider.now(), 10.4, 12000)));
+        Thread.sleep(10);
+        assertEquals(11.204545454545455, publisher.getLastEvent().getData().getVwap());
+
+        // after 1 hour, any price event will keep updating vwap
+        timeProvider.advanceInSecond(1);
+        assertEquals("10:01:01", timeProvider.getCurrentTime());
+        ignessPublisher.publish(new PriceEvent(new Price(currency, timeProvider.now(), 20.4, 12000)));
+        Thread.sleep(10);
+        assertEquals(currency, publisher.getLastEvent().getData().getCurrency());
+        assertEquals(13.2, publisher.getLastEvent().getData().getVwap());
+        publisher.clearLastEvent();
+
+        // different ccy
+        timeProvider.advanceInMinutes(-59);
+        assertEquals("09:02:01", timeProvider.getCurrentTime());
+        setup59MinutesOldData(ignessPublisher, timeProvider, "JPY/USD", 0.423);
+        assertEquals("10:01:01", timeProvider.getCurrentTime());
+        Thread.sleep(10);
+        // nothing publish
+        assertNull(publisher.getLastEvent());
+
+        currency = "JPY/USD";
+        timeProvider.advanceInMinutes(1);
+        assertEquals("10:02:01", timeProvider.getCurrentTime());
+        ignessPublisher.publish(new PriceEvent(new Price(currency, timeProvider.now(), 232.4, 12000)));
+
+        Thread.sleep(10);
+        assertEquals(currency, publisher.getLastEvent().getData().getCurrency());
+        assertEquals(72.05763636363636, publisher.getLastEvent().getData().getVwap());
     }
 
 }

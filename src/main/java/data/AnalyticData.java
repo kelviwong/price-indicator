@@ -13,4 +13,5 @@ public class AnalyticData {
     private long totalVol;
     private double totalPriceVol;
     private String currency;
+    private long firstDataTime;
 }

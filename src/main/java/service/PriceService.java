@@ -60,10 +60,21 @@ public class PriceService implements IService {
                                 throw new RuntimeException(e);
                             }
                         });
-                        AnalyticData analyticData = analyticDataMap.computeIfAbsent(data.getCurrency(), (k) -> new AnalyticData(k));
+
+                        AnalyticData analyticData = analyticDataMap.computeIfAbsent(data.getCurrency(), (k) -> {
+                            AnalyticData firstData = new AnalyticData(k);
+                            firstData.setFirstDataTime(data.getTimestamp());
+                            return firstData;
+                        });
+
                         IndicatorEvent indicatorEvent = new IndicatorEvent(analyticData);
                         vwapCalculator.calculateWithDelta(data, priceDequeStore, analyticData);
-                        publisher.publish(indicatorEvent);
+                        long now = data.getTimestamp();
+                        long expiredTimeInMills = now - 60 * 60 * 1000L;
+                        // only publish when vwap is larger than 0 && the data have 1 hour long
+                        if (analyticData.getVwap() > 0 && expiredTimeInMills >= analyticData.getFirstDataTime()) {
+                            publisher.publish(indicatorEvent);
+                        }
                     }
                 } catch (Exception e) {
                     logger.error("Error processing price event: " + event, e);

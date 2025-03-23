@@ -43,26 +43,35 @@ public class MockTimeProvider implements TimeProvider {
     }
 
     public void advanceInMinutes(int min) {
-        currentTime += min * 60 * 1000L;
+        currentTime += mins(min);
+    }
+
+    public void advanceInSecond(int second) {
+        currentTime += seconds(second);
+    }
+
+    private long seconds(int seconds) {
+        return seconds * 1000L;
+    }
+
+    private long mins(int mins) {
+        return seconds(mins * 60);
     }
 
     public void showCurrentTime() {
-        // Convert milliseconds to Instant
         Instant instant = Instant.ofEpochMilli(currentTime);
-
-        // Define the time zone
         ZoneId zoneId = ZoneId.systemDefault();
-
-        // Convert Instant to LocalDateTime
         LocalDateTime dateTime = LocalDateTime.ofInstant(instant, zoneId);
-
-        // Define the desired date-time format
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
-        // Format the LocalDateTime to a string
         String formattedDateTime = dateTime.format(formatter);
-
-        // Output the result
         logger.info("Current Time {}", formattedDateTime);
+    }
+
+    public String getCurrentTime() {
+        Instant instant = Instant.ofEpochMilli(currentTime);
+        ZoneId zoneId = ZoneId.systemDefault();
+        LocalDateTime dateTime = LocalDateTime.ofInstant(instant, zoneId);
+        String formattedDateTime = dateTime.format(timeFormatter);
+        return formattedDateTime;
     }
 }

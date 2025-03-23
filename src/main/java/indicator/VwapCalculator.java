@@ -48,11 +48,12 @@ public class VwapCalculator implements Calculator {
         long previousTotalVol = analyticData.getTotalVol();
         double previousPriceVol = analyticData.getTotalPriceVol();
 
-        long now = timeProvider.now();
+        long now = newData.getTimestamp();
         long expiredTimeInMills = now - timeLengthInMin * 60 * 1000L;
 
         store.write(newData);
 
+        //sliding windows, remove oldest and calculate the latest
         while (peekData != null && peekData.getTimestamp() != 0 && peekData.getTimestamp() < expiredTimeInMills) {
             oldData.setCurrency(newData.getCurrency());
             store.read(oldData);
@@ -69,6 +70,7 @@ public class VwapCalculator implements Calculator {
         }
 
         double vwap = previousPriceVol / previousTotalVol;
+
         updateVwap(analyticData, vwap, previousTotalVol, previousPriceVol);
         return analyticData.getVwap();
     }
