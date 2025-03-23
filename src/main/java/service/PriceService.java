@@ -12,8 +12,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import publisher.PriceReader;
 import publisher.Publisher;
+import storage.IStore;
+import storage.PriceDequeStore;
+import storage.PriceStoreFactory;
 
-import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -26,15 +28,18 @@ public class PriceService implements IService {
     private volatile boolean isStopped = false;
     private final PriceReader<PriceEvent> priceReader;
     private final Publisher<IndicatorEvent> publisher;
-    private Map<String, ArrayDeque> currencyPriceVolMap;
+    private Map<String, IStore<Price>> currencyPriceVolMap;
     private Map<String, AnalyticData> analyticDataMap;
-    public PriceService(PriceReader<PriceEvent> priceReader, TimeProvider timeProvider, Publisher<IndicatorEvent> publisher) {
+    private final PriceStoreFactory priceStoreFactory;
+    public PriceService(PriceReader<PriceEvent> priceReader, TimeProvider timeProvider,
+                        Publisher<IndicatorEvent> publisher, PriceStoreFactory priceStoreFactory) {
         this.vwapCalculator = new VwapCalculator(timeProvider);
         this.executorService = Executors.newSingleThreadExecutor(new NamedThreadFactory("PriceService"));
         this.priceReader = priceReader;
         this.publisher = publisher;
         this.currencyPriceVolMap = new HashMap<>();
         this.analyticDataMap = new HashMap<>();
+        this.priceStoreFactory = priceStoreFactory;
     }
     @Override
     public void start() {
@@ -46,10 +51,16 @@ public class PriceService implements IService {
                     event = priceReader.poll();
                     if (event != null) {
                         Price data = event.getData();
-                        ArrayDeque<Price> arrayDeque = currencyPriceVolMap.computeIfAbsent(data.getCurrency(), (k) -> new ArrayDeque<Price>());
+                        IStore<Price> priceDequeStore = currencyPriceVolMap.computeIfAbsent(data.getCurrency(), (k) -> {
+                            try {
+                                return priceStoreFactory.createStore(k);
+                            } catch (Exception e) {
+                                throw new RuntimeException(e);
+                            }
+                        });
                         AnalyticData analyticData = analyticDataMap.computeIfAbsent(data.getCurrency(), (k) -> new AnalyticData(k));
                         IndicatorEvent indicatorEvent = new IndicatorEvent(analyticData);
-                        double vwap = vwapCalculator.calculateWithDelta(data, arrayDeque, analyticData);
+                        double vwap = vwapCalculator.calculateWithDelta(data, priceDequeStore, analyticData);
                         analyticData.setVwap(vwap);
                         publisher.publish(indicatorEvent);
                     }

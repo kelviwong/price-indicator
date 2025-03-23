@@ -1,7 +1,8 @@
 import adaptor.PriceAdaptor;
-import common.LocalDateTimeProvider;
-import common.TimeProvider;
+import common.LocalDateTimeProviderFactory;
+import common.ITimeProviderFactory;
 import data.IndicatorEvent;
+import data.Price;
 import data.PriceEvent;
 import feed.PriceFeedHandler;
 import feeder.CmdPriceFeeder;
@@ -16,6 +17,8 @@ import publisher.PriceReader;
 import publisher.Publisher;
 import service.IService;
 import service.PriceService;
+import storage.PriceStoreFactory;
+import storage.StoreType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,8 +42,11 @@ public class App {
         PricePublisher publisher = new PricePublisher(priceEventQueue);
         Publisher<IndicatorEvent> logPricePublisher = new LogPublisher<>();
         PriceReader priceReader = new PriceReader(priceEventQueue);
-        TimeProvider timeProvider = new LocalDateTimeProvider();
-        PriceService priceService = new PriceService(priceReader, timeProvider, logPricePublisher);
+        ITimeProviderFactory timeProviderFactory = new LocalDateTimeProviderFactory();
+
+        PriceStoreFactory priceStoreFactory = new PriceStoreFactory(StoreType.DEQUE);
+
+        PriceService priceService = new PriceService(priceReader, timeProviderFactory.get(), logPricePublisher, priceStoreFactory);
         priceService.start();
 
         PriceFeedHandler feedHandler = new PriceFeedHandler();

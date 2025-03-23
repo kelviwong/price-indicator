@@ -3,6 +3,7 @@ package indicator;
 import common.TimeProvider;
 import data.AnalyticData;
 import data.Price;
+import storage.IStore;
 
 import java.util.ArrayDeque;
 import java.util.List;
@@ -16,12 +17,12 @@ public class VwapCalculator implements Calculator {
     }
 
     @Override
-    public double calculate(List<Price> priceData, ArrayDeque<Price> arrayDeque, AnalyticData analyticData) {
+    public double calculate(List<Price> priceData, IStore<Price> store, AnalyticData analyticData) {
         int size = priceData.size();
         long totalVol = 0L;
         double accumulatePriceVol = 0.0d;
 
-        arrayDeque.addAll(priceData);
+        store.writeAll(priceData);
 
         //we can use enhanced for loop here, escape analysis should optimize to put the iterator to stack
         for (int i = 0; i < size; i++) {
@@ -40,19 +41,24 @@ public class VwapCalculator implements Calculator {
         return analyticData.getVwap();
     }
 
-    public double calculateWithDelta(Price newData, ArrayDeque<Price> arrayDeque, AnalyticData analyticData) {
-        Price data = arrayDeque.peek();
+    Price oldData = new Price();
+    Price peekData = new Price();
+    public double calculateWithDelta(Price newData, IStore<Price> store, AnalyticData analyticData) {
+        store.peek(peekData);
         long previousTotalVol = analyticData.getTotalVol();
         double previousPriceVol = analyticData.getTotalPriceVol();
 
         long now = timeProvider.now();
         long expiredTimeInMills = now - timeLengthInMin * 60 * 1000L;
 
-        while (data != null && data.getTimestamp() < expiredTimeInMills) {
-            Price oldData = arrayDeque.pop();
+        store.write(newData);
+
+        while (peekData != null && peekData.getTimestamp() != 0 && peekData.getTimestamp() < expiredTimeInMills) {
+            oldData.setCurrency(newData.getCurrency());
+            store.read(oldData);
             previousTotalVol -= oldData.getVolume();
             previousPriceVol -= oldData.getVolume() * oldData.getPrice();
-            data = arrayDeque.peek();
+            store.peek(peekData);
         }
 
         previousTotalVol += newData.getVolume();
