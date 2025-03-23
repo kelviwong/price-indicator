@@ -1,4 +1,5 @@
 package adaptor;
 
-public class Adaptor {
+public interface Adaptor {
+    void process() throws Exception;
 }

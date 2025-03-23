@@ -13,13 +13,13 @@ public abstract class ClientCommand implements ICommand {
         this.systemOutPrinter = systemOutPrinter;
     }
 
-    public void execute(String[] command) {
+    public void execute(String[] command, String commandText) {
         boolean validate = validate(command);
         if (!validate) {
             return;
         }
 
-        action(command);
+        action(command, commandText);
     }
 
     abstract boolean validate(String[] command);

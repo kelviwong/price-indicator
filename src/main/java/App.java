@@ -10,7 +10,7 @@ import feeder.prompt.CommandClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import printer.SystemOutPrinter;
-import publisher.LogPricePublisher;
+import publisher.LogPublisher;
 import publisher.PricePublisher;
 import publisher.PriceReader;
 import publisher.Publisher;
@@ -23,25 +23,22 @@ import java.util.concurrent.ArrayBlockingQueue;
 
 public class App {
 
-    private static final Logger logger = LoggerFactory.getLogger(LogPricePublisher.class);
+    private static final Logger logger = LoggerFactory.getLogger(LogPublisher.class);
 
     public static void main(String[] args) {
         List<IService> services = new ArrayList<>();
 
         SystemOutPrinter systemOutPrinter = new SystemOutPrinter();
-//        ArrayBlockingQueue<String> feedQueue = new ArrayBlockingQueue<>();
         PriceFeeder<String> cmdPriceFeeder = new CmdPriceFeeder();
         CommandClient client = new CommandClient(cmdPriceFeeder, systemOutPrinter);
         client.start();
 
         services.add(client);
 
-
         ArrayBlockingQueue<PriceEvent> priceEventQueue = new ArrayBlockingQueue<>(10000);
         PricePublisher publisher = new PricePublisher(priceEventQueue);
-        Publisher<IndicatorEvent> logPricePublisher = new LogPricePublisher<>();
+        Publisher<IndicatorEvent> logPricePublisher = new LogPublisher<>();
         PriceReader priceReader = new PriceReader(priceEventQueue);
-//        Publisher<PriceEvent> publisher = new LogPricePublisher();
         TimeProvider timeProvider = new LocalDateTimeProvider();
         PriceService priceService = new PriceService(priceReader, timeProvider, logPricePublisher);
         priceService.start();
@@ -52,7 +49,6 @@ public class App {
         priceAdaptor.start();
 
         services.add(priceAdaptor);
-
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             logger.info("Shutdown hook triggered. Cleaning up...");

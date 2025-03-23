@@ -26,10 +26,8 @@ public class PriceService implements IService {
     private volatile boolean isStopped = false;
     private final PriceReader<PriceEvent> priceReader;
     private final Publisher<IndicatorEvent> publisher;
-
     private Map<String, ArrayDeque> currencyPriceVolMap;
     private Map<String, AnalyticData> analyticDataMap;
-
     public PriceService(PriceReader<PriceEvent> priceReader, TimeProvider timeProvider, Publisher<IndicatorEvent> publisher) {
         this.vwapCalculator = new VwapCalculator(timeProvider);
         this.executorService = Executors.newSingleThreadExecutor(new NamedThreadFactory("PriceService"));
@@ -38,7 +36,6 @@ public class PriceService implements IService {
         this.currencyPriceVolMap = new HashMap<>();
         this.analyticDataMap = new HashMap<>();
     }
-
     @Override
     public void start() {
         logger.info("Start Price Service");
@@ -56,7 +53,7 @@ public class PriceService implements IService {
                         analyticData.setVwap(vwap);
                         publisher.publish(indicatorEvent);
                     }
-                } catch (InterruptedException e) {
+                } catch (Exception e) {
                     logger.error("Error processing price event: " + event, e);
                 }
             }
@@ -65,6 +62,7 @@ public class PriceService implements IService {
 
     @Override
     public void stop() {
+        logger.info("Stop Price Service");
         isStopped = true;
     }
 }

@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit;
 public class CommandClient implements IService {
     private final Map<CommandType, ICommand> commandMap;
     private final SystemOutPrinter systemOutPrinter;
-    private static final String delimiter = "-";
+    private static final String delimiter = " ";
     private ExecutorService executorService;
 
     public CommandClient(PriceFeeder<String> cmdPriceFeeder, SystemOutPrinter systemOutPrinter) {
@@ -55,7 +55,7 @@ public class CommandClient implements IService {
 
     private void LoadPrompt() {
         SystemOutPrinter systemOutPrinter = new SystemOutPrinter();
-        String instruction = "Enter your price in addprice-9:30 AM;AUD/USD;0.6905;106,198, exit to quit";
+        String instruction = "Enter your price in addprice 9:30 AM AUD/USD 0.6905 106,198, exit to quit";
         systemOutPrinter.print(instruction);
         Scanner scanner = new Scanner(System.in);
         while (scanner.hasNext()) {
@@ -78,9 +78,10 @@ public class CommandClient implements IService {
                     continue;
                 }
 
-                ICommand command = commandMap.get(commandType.get());
+                CommandType type = commandType.get();
+                ICommand command = commandMap.get(type);
                 systemOutPrinter.print("Price input: " + commandText);
-                command.execute(commandSplit);
+                command.execute(commandSplit, commandText.substring(type.value.length()));
 
                 systemOutPrinter.print("");
                 systemOutPrinter.print(instruction);

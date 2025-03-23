@@ -8,16 +8,11 @@ import java.util.ArrayDeque;
 import java.util.List;
 
 public class VwapCalculator implements Calculator {
-//    long previousTotalVol = 0;
-//    double previousPriceVol = 0;
-    TimeProvider timeProvider;
+    private TimeProvider timeProvider;
     private final static int timeLengthInMin = 60;
-
-//    private Map<String, AnalyticData> analyticDataMap;
 
     public VwapCalculator(TimeProvider timeProvider) {
         this.timeProvider = timeProvider;
-//        this.analyticDataMap = new HashMap<>();
     }
 
     @Override
@@ -25,9 +20,6 @@ public class VwapCalculator implements Calculator {
         int size = priceData.size();
         long totalVol = 0L;
         double accumulatePriceVol = 0.0d;
-//        AnalyticData analyticData = analyticDataMap.computeIfAbsent(data.getCurrency(), (k) -> new AnalyticData());
-//        long previousTotalVol = analyticData.getTotalVol();
-//        double previousPriceVol = analyticData.getTotalPriceVol();
 
         arrayDeque.addAll(priceData);
 
@@ -38,6 +30,10 @@ public class VwapCalculator implements Calculator {
             accumulatePriceVol += data.getVolume() * data.getPrice();
         }
 
+        if (totalVol == 0) {
+            return 0;
+        }
+
         double vwap = accumulatePriceVol / totalVol;
         updateVwap(analyticData, vwap, totalVol, accumulatePriceVol);
 
@@ -46,7 +42,6 @@ public class VwapCalculator implements Calculator {
 
     public double calculateWithDelta(Price newData, ArrayDeque<Price> arrayDeque, AnalyticData analyticData) {
         Price data = arrayDeque.peek();
-//        AnalyticData analyticData = analyticDataMap.computeIfAbsent(data.getCurrency(), (k) -> new AnalyticData());
         long previousTotalVol = analyticData.getTotalVol();
         double previousPriceVol = analyticData.getTotalPriceVol();
 

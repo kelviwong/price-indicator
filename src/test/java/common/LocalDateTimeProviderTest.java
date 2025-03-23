@@ -9,7 +9,6 @@ import java.time.ZonedDateTime;
 import static org.junit.jupiter.api.Assertions.*;
 
 class LocalDateTimeProviderTest {
-
     @Test
     public void testLocalDateTimeProvider() {
         TimeProvider provider = new LocalDateTimeProvider();

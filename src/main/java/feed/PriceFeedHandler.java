@@ -10,23 +10,25 @@ public class PriceFeedHandler implements FeedHandler<String> {
     DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("h:mm a", Locale.ENGLISH);
     final StringBuilder sb = new StringBuilder();
 
-    //The price feed data should be
+    // The price feed data
     // TimeStamp currencyPair price volume
     @Override
     public Price process(String feed) throws Exception {
-       // 9:30 AM;AUD/USD;0.6905;106,198
+       // 9:30 AM AUD/USD 0.6905 106,198
 
-        String[] feedSplit = feed.split(";");
-        if (feedSplit.length < 4) {
+        String[] feedSplit = feed.split(" ");
+        if (feedSplit.length < 5) {
             throw new Exception("Incorrect feed. " + feed);
         }
 
-        long time = parseTime(feedSplit[0]);
+        sb.setLength(0);
+        long time = parseTime(sb.append(feedSplit[0]).append(" ").append(feedSplit[1]).toString());
 
-        double price = Double.parseDouble(feedSplit[2]);
-        long volume = parseLong(feedSplit[3], ',');
-        return new Price(feedSplit[1], time, price, volume);
+        double price = Double.parseDouble(feedSplit[3]);
+        long volume = parseLong(feedSplit[4], ',');
+        return new Price(feedSplit[2], time, price, volume);
     }
+
     private long parseLong(String volumeStr, char removeChar) {
         int length = volumeStr.length();
         sb.setLength(0);
@@ -38,7 +40,7 @@ public class PriceFeedHandler implements FeedHandler<String> {
             sb.append(c);
         }
 
-        // this parseLong can further improve by no need intake a string but directly consume sb
+        // this parseLong can further improve by directly consume sb
         // so as to reduce garbage
         return Long.parseLong(sb.toString());
     }

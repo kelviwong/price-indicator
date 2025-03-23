@@ -22,10 +22,27 @@ class PriceAdaptorTest {
         PriceFeedHandler priceFeedHandler = new PriceFeedHandler();
         PriceAdaptor priceAdaptor = new PriceAdaptor(priceFeedHandler, publisher, priceFeeder);
         priceAdaptor.start();
-        String data = "9:30 AM;AUD/USD;0.6905;106,198";
+        String data = "9:30 AM AUD/USD 0.6905 106,198";
         priceFeeder.pushData(data);
         Thread.sleep(10);
         verify(publisher, times(1)).publish(any(PriceEvent.class));
+        priceAdaptor.stop();
+    }
+
+    @Test
+    public void testWrongFeedWillNotCrashSystemAndSkipTheMessage() throws Exception {
+        SimulatePriceFeeder priceFeeder = new SimulatePriceFeeder();
+        PriceFeedHandler priceFeedHandler = new PriceFeedHandler();
+        PriceAdaptor priceAdaptor = new PriceAdaptor(priceFeedHandler, publisher, priceFeeder);
+        priceAdaptor.start();
+        String data = "9:30 AM AUD/USD 0.6905 106,198";
+        priceFeeder.pushData(data);
+        data = "sdfaljlfsadjf;AUD/USD;0.6905;106,198";
+        priceFeeder.pushData(data);
+        data = "9:31 AM AUD/USD 0.3920 20,198";
+        priceFeeder.pushData(data);
+        Thread.sleep(10);
+        verify(publisher, times(2)).publish(any(PriceEvent.class));
         priceAdaptor.stop();
     }
 

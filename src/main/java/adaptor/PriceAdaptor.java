@@ -13,15 +13,15 @@ import service.IService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class PriceAdaptor implements IService {
+public class PriceAdaptor implements IService, Adaptor {
     private final ExecutorService executorService;
-    FeedHandler<String> feedHandler;
-    Publisher<PriceEvent> publisher;
-    PriceFeeder<String> feeder;
-
-    volatile boolean isStop;
+    private FeedHandler<String> feedHandler;
+    private Publisher<PriceEvent> publisher;
+    private PriceFeeder<String> feeder;
+    private volatile boolean isStop;
 
     private static final Logger logger = LoggerFactory.getLogger(PriceAdaptor.class);
+
     public PriceAdaptor(FeedHandler<String> feedHandler, Publisher<PriceEvent> publisher, PriceFeeder<String> feeder) {
         this.feedHandler = feedHandler;
         this.publisher = publisher;
@@ -32,24 +32,26 @@ public class PriceAdaptor implements IService {
     }
 
     public void process() throws Exception {
-        while (!isStop) {
-            String data = feeder.getData();
-            Price price = feedHandler.process(data);
-            PriceEvent event = new PriceEvent(price);
-            publisher.publish(event);
-        }
+        String data = feeder.getData();
+        Price price = feedHandler.process(data);
+        PriceEvent event = new PriceEvent(price);
+        publisher.publish(event);
+
     }
 
     public void start() {
         logger.info("Starting adaptor on Thead");
         executorService.submit(() -> {
-            try {
-                process();
-            } catch (Exception e) {
-                logger.error("Error in Price Adaptor: ", e);
+            while (!isStop) {
+                try {
+                    process();
+                } catch (Exception e) {
+                    logger.error("Error in Price Adaptor: ", e);
+                }
             }
         });
     }
+
     public void stop() {
         logger.info("Stopping adaptor");
         this.isStop = true;

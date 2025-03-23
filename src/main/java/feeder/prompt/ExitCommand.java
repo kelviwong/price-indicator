@@ -15,7 +15,7 @@ public class ExitCommand extends ClientCommand {
     }
 
     @Override
-    public void action(String[] command) {
+    public void action(String[] command, String commandText) {
         System.exit(0);
     }
 }

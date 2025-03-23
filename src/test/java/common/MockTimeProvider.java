@@ -5,7 +5,6 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
 public class MockTimeProvider implements TimeProvider {
-
     long currentTime;
 
     public MockTimeProvider() {
