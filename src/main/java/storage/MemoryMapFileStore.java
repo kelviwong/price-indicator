@@ -21,6 +21,11 @@ public abstract class MemoryMapFileStore<T> implements IStore<T> {
     public MemoryMapFileStore(String path, int size) throws Exception {
         this.path = path;
         try {
+            Path filePath = Paths.get(path);
+            if (Files.exists(filePath)) {
+                cleanUp(path);
+            }
+
             file = new RandomAccessFile(this.path, "rw");
             FileChannel channel = file.getChannel();
             // Map a region of the file into memory

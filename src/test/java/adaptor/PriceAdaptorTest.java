@@ -2,7 +2,7 @@ package adaptor;
 
 import data.PriceEvent;
 import feed.PriceFeedHandler;
-import feeder.SimulatePriceFeeder;
+import util.SimulatePriceFeeder;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;

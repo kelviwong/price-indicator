@@ -39,12 +39,12 @@ public class App {
         services.add(client);
 
         ArrayBlockingQueue<PriceEvent> priceEventQueue = new ArrayBlockingQueue<>(10000);
-        PricePublisher publisher = new PricePublisher(priceEventQueue);
+        PricePublisher<PriceEvent> publisher = new PricePublisher<>(priceEventQueue);
         Publisher<IndicatorEvent> logPricePublisher = new LogPublisher<>();
-        PriceReader priceReader = new PriceReader(priceEventQueue);
+        PriceReader<PriceEvent> priceReader = new PriceReader<>(priceEventQueue);
         ITimeProviderFactory timeProviderFactory = new LocalDateTimeProviderFactory();
 
-        PriceStoreFactory priceStoreFactory = new PriceStoreFactory(StoreType.DEQUE, "");
+        PriceStoreFactory priceStoreFactory = new PriceStoreFactory(StoreType.MEM_MAP, "prod");
 
         PriceService priceService = new PriceService(priceReader, timeProviderFactory.get(), logPricePublisher, priceStoreFactory);
         priceService.start();

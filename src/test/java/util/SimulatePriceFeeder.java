@@ -1,4 +1,6 @@
-package feeder;
+package util;
+
+import feeder.PriceFeeder;
 
 import java.util.concurrent.ArrayBlockingQueue;
 
