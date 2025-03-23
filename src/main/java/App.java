@@ -2,7 +2,6 @@ import adaptor.PriceAdaptor;
 import common.LocalDateTimeProviderFactory;
 import common.ITimeProviderFactory;
 import data.IndicatorEvent;
-import data.Price;
 import data.PriceEvent;
 import feed.PriceFeedHandler;
 import feeder.CmdPriceFeeder;
