@@ -63,8 +63,8 @@ class PriceStoreTest {
         List<Price> priceList = new ArrayList<>();
         String currency = "AUD/USD";
         setupData(priceList, currency, mockTimeProvider);
-        String path = currency.replace("/", "_") + ".bin";
-        PriceMemoryMapFileStore memoryMapFileStore = new PriceMemoryMapFileStore(path, 1024);
+        String path = createPath(currency);
+        PriceMemoryMapFileStore memoryMapFileStore = createMMFFileStore(path);
         Price newPrice = new Price(currency, mockTimeProvider.now(), 22200.5, 2000);
         Price temp = new Price();
         temp.setCurrency(currency);
@@ -85,7 +85,15 @@ class PriceStoreTest {
         assertEquals(3433.5, temp.getPrice());
         assertEquals(2000, temp.getVolume());
         memoryMapFileStore.close();
-        PriceMemoryMapFileStore.cleanUp(path);
+    }
+
+    private static String createPath(String currency) {
+        return currency.replace("/", "_") + "_" + "test";
+    }
+
+    private static PriceMemoryMapFileStore createMMFFileStore(String path) throws Exception {
+        PriceMemoryMapFileStore memoryMapFileStore = new PriceMemoryMapFileStore(path, 1024);
+        return memoryMapFileStore;
     }
 
     @Test
@@ -94,8 +102,8 @@ class PriceStoreTest {
         List<Price> priceList = new ArrayList<>();
         String currency = "AUD/USD";
         setupData(priceList, currency, mockTimeProvider);
-        String path = currency.replace("/", "_") + ".bin";
-        PriceMemoryMapFileStore memoryMapFileStore = new PriceMemoryMapFileStore(path, 1024);
+        String path = createPath(currency);
+        PriceMemoryMapFileStore memoryMapFileStore = createMMFFileStore(path);
         memoryMapFileStore.writeAll(priceList);
         assertEquals(5, memoryMapFileStore.size());
         Price temp = new Price();
@@ -109,6 +117,7 @@ class PriceStoreTest {
         verifyPriceList(priceList.get(3), temp);
         memoryMapFileStore.read(temp);
         verifyPriceList(priceList.get(4), temp);
+        memoryMapFileStore.close();
     }
 
     public void verifyPriceList(Price sourcePrice, Price targetPrice) {

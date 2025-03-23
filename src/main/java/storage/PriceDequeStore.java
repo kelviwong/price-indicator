@@ -54,4 +54,9 @@ public class PriceDequeStore implements IStore<Price> {
     public int size() {
         return store.size();
     }
+
+    @Override
+    public void close() {
+
+    }
 }

@@ -44,7 +44,7 @@ public class App {
         PriceReader priceReader = new PriceReader(priceEventQueue);
         ITimeProviderFactory timeProviderFactory = new LocalDateTimeProviderFactory();
 
-        PriceStoreFactory priceStoreFactory = new PriceStoreFactory(StoreType.DEQUE);
+        PriceStoreFactory priceStoreFactory = new PriceStoreFactory(StoreType.DEQUE, "");
 
         PriceService priceService = new PriceService(priceReader, timeProviderFactory.get(), logPricePublisher, priceStoreFactory);
         priceService.start();

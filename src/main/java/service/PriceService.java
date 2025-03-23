@@ -13,9 +13,9 @@ import org.slf4j.LoggerFactory;
 import publisher.PriceReader;
 import publisher.Publisher;
 import storage.IStore;
-import storage.PriceDequeStore;
 import storage.PriceStoreFactory;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -31,6 +31,7 @@ public class PriceService implements IService {
     private Map<String, IStore<Price>> currencyPriceVolMap;
     private Map<String, AnalyticData> analyticDataMap;
     private final PriceStoreFactory priceStoreFactory;
+
     public PriceService(PriceReader<PriceEvent> priceReader, TimeProvider timeProvider,
                         Publisher<IndicatorEvent> publisher, PriceStoreFactory priceStoreFactory) {
         this.vwapCalculator = new VwapCalculator(timeProvider);
@@ -41,6 +42,7 @@ public class PriceService implements IService {
         this.analyticDataMap = new HashMap<>();
         this.priceStoreFactory = priceStoreFactory;
     }
+
     @Override
     public void start() {
         logger.info("Start Price Service");
@@ -60,8 +62,7 @@ public class PriceService implements IService {
                         });
                         AnalyticData analyticData = analyticDataMap.computeIfAbsent(data.getCurrency(), (k) -> new AnalyticData(k));
                         IndicatorEvent indicatorEvent = new IndicatorEvent(analyticData);
-                        double vwap = vwapCalculator.calculateWithDelta(data, priceDequeStore, analyticData);
-                        analyticData.setVwap(vwap);
+                        vwapCalculator.calculateWithDelta(data, priceDequeStore, analyticData);
                         publisher.publish(indicatorEvent);
                     }
                 } catch (Exception e) {
@@ -74,6 +75,13 @@ public class PriceService implements IService {
     @Override
     public void stop() {
         logger.info("Stop Price Service");
+        if (currencyPriceVolMap != null) {
+            Collection<IStore<Price>> values = currencyPriceVolMap.values();
+            for (IStore<Price> value : values) {
+                value.close();
+            }
+        }
+
         isStopped = true;
     }
 }

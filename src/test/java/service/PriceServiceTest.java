@@ -50,7 +50,7 @@ class PriceServiceTest {
 
         PricePublisher<PriceEvent> ignessPublisher = new PricePublisher<>(priceEventArrayBlockingQueue);
         PriceReader priceReader = new PriceReader(priceEventArrayBlockingQueue);
-        PriceStoreFactory priceStoreFactory = new PriceStoreFactory(storeType);
+        PriceStoreFactory priceStoreFactory = new PriceStoreFactory(storeType, "test2");
         PriceService priceService = new PriceService(priceReader, timeProvider, publisher, priceStoreFactory);
         priceService.start();
         setupData(ignessPublisher, timeProvider, "AUD/USD", 0.0d);

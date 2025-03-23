@@ -31,6 +31,7 @@ public abstract class MemoryMapFileStore<T> implements IStore<T> {
         }
     }
 
+    @Override
     public void close() {
         try {
             if (file != null) {

@@ -8,4 +8,5 @@ public interface IStore<T> {
     void peek(T data);
     void writeAll(List<T> data);
     int size();
+    void close();
 }
