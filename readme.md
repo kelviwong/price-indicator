@@ -1,5 +1,7 @@
 outline of the program
 
+Java 8
+
 1. take in the price real time per currency pair, e.g. I have created a cmd prompt to input the price when com.run.App start
 2. calculate 1-hour VWAP price
 3. calculate only when new price come in using sliding windows for 1 hour, e.g. remove old one and add in new price vol.
