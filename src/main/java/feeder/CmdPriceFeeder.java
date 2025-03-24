@@ -1,10 +1,17 @@
 package feeder;
 
-import java.util.concurrent.ArrayBlockingQueue;
+import queue.QueueFactory;
+import queue.QueueType;
+
+import java.util.concurrent.BlockingQueue;
 
 public class CmdPriceFeeder implements PriceFeeder<String>{
 
-    ArrayBlockingQueue<String> queue = new ArrayBlockingQueue<>(10000);
+    BlockingQueue<String> queue;
+
+    public CmdPriceFeeder() throws Exception {
+        this.queue = QueueFactory.createQueue(10000, QueueType.BACKOFF);
+    }
 
     @Override
     public String getData() throws InterruptedException {

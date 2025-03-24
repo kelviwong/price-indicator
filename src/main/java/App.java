@@ -1,10 +1,12 @@
 import adaptor.PriceAdaptor;
-import common.LocalDateTimeProviderFactory;
 import common.ITimeProviderFactory;
+import common.LocalDateTimeProviderFactory;
+import common.PriceStoreFactory;
 import config.Config;
 import data.IndicatorEvent;
 import data.PriceEvent;
 import dispatcher.DispatcherAgent;
+import enums.StoreType;
 import feed.PriceFeedHandler;
 import feeder.CmdPriceFeeder;
 import feeder.PriceFeeder;
@@ -16,21 +18,20 @@ import publisher.LogPublisher;
 import publisher.PricePublisher;
 import publisher.PriceReader;
 import publisher.Publisher;
+import queue.QueueFactory;
+import queue.QueueType;
 import service.IService;
 import service.PriceService;
-import common.PriceStoreFactory;
-import enums.StoreType;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
 public class App {
 
     private static final Logger logger = LoggerFactory.getLogger(LogPublisher.class);
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws Exception {
         List<IService> services = new ArrayList<>();
 
         Config config = Config.loadConfig("config.yaml");
@@ -41,7 +42,8 @@ public class App {
         CommandClient client = getCommandClient(cmdPriceFeeder);
         services.add(client);
 
-        ArrayBlockingQueue<PriceEvent> priceEventQueue = new ArrayBlockingQueue<>(10000);
+        BlockingQueue<PriceEvent> priceEventQueue = QueueFactory.createQueue(10000, QueueType.BACKOFF);
+
         PricePublisher<PriceEvent> publisher = new PricePublisher<>(priceEventQueue);
 
         PriceService priceService = getPriceService(priceEventQueue, config);
@@ -76,7 +78,7 @@ public class App {
         return priceAdaptor;
     }
 
-    private static PriceService getPriceService(ArrayBlockingQueue<PriceEvent> priceEventQueue, Config config) {
+    private static PriceService getPriceService(BlockingQueue<PriceEvent> priceEventQueue, Config config) {
         Publisher<IndicatorEvent> logPricePublisher = new LogPublisher<>();
         PriceReader<PriceEvent> priceReader = new PriceReader<>(priceEventQueue);
         ITimeProviderFactory timeProviderFactory = new LocalDateTimeProviderFactory();

@@ -1,11 +1,11 @@
 package publisher;
 
-import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
 public class PricePublisher<T> implements Publisher<T> {
-    ArrayBlockingQueue<T> queue;
+    BlockingQueue<T> queue;
 
-    public PricePublisher(ArrayBlockingQueue<T> queue) {
+    public PricePublisher(BlockingQueue<T> queue) {
         this.queue = queue;
     }
     @Override

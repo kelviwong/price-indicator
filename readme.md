@@ -24,6 +24,7 @@ Design:
 10. or change MMF which we can set a very large SSD file. TODO: rotate the MMF to expand when not enough space.
 11. Factory pattern to be able to create a different object and swap with different factory.
 12. we can add few more indicator, like RSI or EMA if close price is there.
+13. BackOffQueue to handle when it exceed the capacity.
 
 For memory usage
 1. Storing Price in Deque involve

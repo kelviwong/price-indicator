@@ -1,11 +1,11 @@
 package publisher;
 
-import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
 public class PriceReader<T> implements Reader<T> {
-    ArrayBlockingQueue<T> queue;
+    BlockingQueue<T> queue;
 
-    public PriceReader(ArrayBlockingQueue<T> queue) {
+    public PriceReader(BlockingQueue<T> queue) {
         this.queue = queue;
     }
 
