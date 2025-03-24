@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 
+@Setter
+@Getter
 @ToString
 public class Config {
 
@@ -24,11 +26,7 @@ public class Config {
         private int vwapIntervalInMs;
     }
 
-    @Getter
-    @Setter
     private DispatcherConfig dispatcherConfig;
-    @Getter
-    @Setter
     private VwapConfig vwapConfig;
 
     public static Config loadConfig(String filePath) throws IOException {

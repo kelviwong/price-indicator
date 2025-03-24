@@ -8,8 +8,6 @@ import publisher.PricePublisher;
 
 import java.io.IOException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 public class Data {
 
     public static void setup59MinutesOldData(PricePublisher<PriceEvent> publisher, MockTimeProvider mockTimeProvider, String currency, double adjustPrice) throws InterruptedException {
