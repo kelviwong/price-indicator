@@ -36,31 +36,18 @@ public class App {
         Config config = Config.loadConfig("config.yaml");
         logger.info("Loaded config: " + config);
 
-        SystemOutPrinter systemOutPrinter = new SystemOutPrinter();
         PriceFeeder<String> cmdPriceFeeder = new CmdPriceFeeder();
-        CommandClient client = new CommandClient(cmdPriceFeeder, systemOutPrinter);
-        client.start();
 
+        CommandClient client = getCommandClient(cmdPriceFeeder);
         services.add(client);
 
         ArrayBlockingQueue<PriceEvent> priceEventQueue = new ArrayBlockingQueue<>(10000);
         PricePublisher<PriceEvent> publisher = new PricePublisher<>(priceEventQueue);
-        Publisher<IndicatorEvent> logPricePublisher = new LogPublisher<>();
-        PriceReader<PriceEvent> priceReader = new PriceReader<>(priceEventQueue);
-        ITimeProviderFactory timeProviderFactory = new LocalDateTimeProviderFactory();
 
-        PriceStoreFactory priceStoreFactory = new PriceStoreFactory(StoreType.DEQUE, "prod");
+        PriceService priceService = getPriceService(priceEventQueue, config);
+        services.add(priceService);
 
-        DispatcherAgent dispatcherAgent = new DispatcherAgent(config.getDispatcherConfig().getThreads());
-
-        PriceService priceService = new PriceService(priceReader, timeProviderFactory.get(), logPricePublisher, priceStoreFactory, dispatcherAgent, config);
-        priceService.start();
-
-        PriceFeedHandler feedHandler = new PriceFeedHandler();
-
-        PriceAdaptor priceAdaptor = new PriceAdaptor(feedHandler, publisher, cmdPriceFeeder);
-        priceAdaptor.start();
-
+        PriceAdaptor priceAdaptor = getPriceAdaptor(publisher, cmdPriceFeeder);
         services.add(priceAdaptor);
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -73,5 +60,34 @@ public class App {
                 }
             }
         }));
+    }
+
+    private static CommandClient getCommandClient(PriceFeeder<String> cmdPriceFeeder) {
+        SystemOutPrinter systemOutPrinter = new SystemOutPrinter();
+        CommandClient client = new CommandClient(cmdPriceFeeder, systemOutPrinter);
+        client.start();
+        return client;
+    }
+
+    private static PriceAdaptor getPriceAdaptor(PricePublisher<PriceEvent> publisher, PriceFeeder<String> cmdPriceFeeder) {
+        PriceFeedHandler feedHandler = new PriceFeedHandler();
+        PriceAdaptor priceAdaptor = new PriceAdaptor(feedHandler, publisher, cmdPriceFeeder);
+        priceAdaptor.start();
+        return priceAdaptor;
+    }
+
+    private static PriceService getPriceService(ArrayBlockingQueue<PriceEvent> priceEventQueue, Config config) {
+        Publisher<IndicatorEvent> logPricePublisher = new LogPublisher<>();
+        PriceReader<PriceEvent> priceReader = new PriceReader<>(priceEventQueue);
+        ITimeProviderFactory timeProviderFactory = new LocalDateTimeProviderFactory();
+
+        StoreType storeType = config.getPriceServiceConfig().getStoreType();
+        PriceStoreFactory priceStoreFactory = new PriceStoreFactory(storeType, "prod");
+
+        DispatcherAgent dispatcherAgent = new DispatcherAgent(config.getDispatcherConfig().getThreads());
+
+        PriceService priceService = new PriceService(priceReader, timeProviderFactory.get(), logPricePublisher, priceStoreFactory, dispatcherAgent, config);
+        priceService.start();
+        return priceService;
     }
 }

@@ -3,3 +3,6 @@ dispatcher:
 
 vwap:
   vwapIntervalInMs: 3600000
+
+priceService:
+  storeType: DEQUE

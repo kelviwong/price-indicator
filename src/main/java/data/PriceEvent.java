@@ -1,6 +1,6 @@
 package data;
 
-public class PriceEvent extends Event<Price>{
+public class PriceEvent extends Event<Price> {
     public PriceEvent(Price data) {
         super(data);
     }

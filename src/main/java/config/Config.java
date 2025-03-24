@@ -1,5 +1,6 @@
 package config;
 
+import enums.StoreType;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -26,8 +27,14 @@ public class Config {
         private int vwapIntervalInMs;
     }
 
+    @Data
+    public static class PriceServiceConfig {
+        private StoreType storeType;
+    }
+
     private DispatcherConfig dispatcherConfig;
     private VwapConfig vwapConfig;
+    private PriceServiceConfig priceServiceConfig;
 
     public static Config loadConfig(String filePath) throws IOException {
         Yaml yaml = new Yaml();
@@ -64,6 +71,12 @@ public class Config {
         VwapConfig vwapConfig = new VwapConfig();
         vwapConfig.setVwapIntervalInMs((Integer) map.get("vwapIntervalInMs"));
         config.setVwapConfig(vwapConfig);
+
+        map = (Map<String, Object>) obj.get("priceService");
+        PriceServiceConfig priceServiceConfig = new PriceServiceConfig();
+        priceServiceConfig.setStoreType(StoreType.valueOf((String) map.get("storeType")));
+        config.setPriceServiceConfig(priceServiceConfig);
+
         return config;
     }
 }

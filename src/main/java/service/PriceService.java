@@ -61,10 +61,11 @@ public class PriceService implements IService {
                     event = priceReader.poll();
                     if (event != null) {
                         Price data = event.getData();
-                        IStore<Price> priceDequeStore = currencyPriceVolMap.computeIfAbsent(data.getCurrency(), (k) -> {
+                        IStore<Price> priceStore = currencyPriceVolMap.computeIfAbsent(data.getCurrency(), (k) -> {
                             try {
                                 return priceStoreFactory.createStore(k);
                             } catch (Exception e) {
+                                logger.error("Error price store : {}", k, e);
                                 throw new RuntimeException(e);
                             }
                         });
@@ -75,7 +76,7 @@ public class PriceService implements IService {
                             return firstData;
                         });
 
-                        VwapTask<Price> VwapTask = new VwapTask<>(analyticData, priceDequeStore, publisher, vwapCalculator, config);
+                        VwapTask<Price> VwapTask = new VwapTask<>(analyticData, priceStore, publisher, vwapCalculator, config);
                         VwapTask.setData(data);
 
                         dispatcherAgent.dispatchTask(data.getCurrency(), VwapTask);
