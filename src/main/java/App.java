@@ -1,8 +1,10 @@
 import adaptor.PriceAdaptor;
 import common.LocalDateTimeProviderFactory;
 import common.ITimeProviderFactory;
+import config.Config;
 import data.IndicatorEvent;
 import data.PriceEvent;
+import dispatcher.DispatcherAgent;
 import feed.PriceFeedHandler;
 import feeder.CmdPriceFeeder;
 import feeder.PriceFeeder;
@@ -16,9 +18,10 @@ import publisher.PriceReader;
 import publisher.Publisher;
 import service.IService;
 import service.PriceService;
-import storage.PriceStoreFactory;
-import storage.StoreType;
+import common.PriceStoreFactory;
+import enums.StoreType;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -27,8 +30,11 @@ public class App {
 
     private static final Logger logger = LoggerFactory.getLogger(LogPublisher.class);
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         List<IService> services = new ArrayList<>();
+
+        Config config = Config.loadConfig("config.yaml");
+        logger.info("Loaded config: " + config);
 
         SystemOutPrinter systemOutPrinter = new SystemOutPrinter();
         PriceFeeder<String> cmdPriceFeeder = new CmdPriceFeeder();
@@ -43,9 +49,11 @@ public class App {
         PriceReader<PriceEvent> priceReader = new PriceReader<>(priceEventQueue);
         ITimeProviderFactory timeProviderFactory = new LocalDateTimeProviderFactory();
 
-        PriceStoreFactory priceStoreFactory = new PriceStoreFactory(StoreType.MEM_MAP, "prod");
+        PriceStoreFactory priceStoreFactory = new PriceStoreFactory(StoreType.DEQUE, "prod");
 
-        PriceService priceService = new PriceService(priceReader, timeProviderFactory.get(), logPricePublisher, priceStoreFactory);
+        DispatcherAgent dispatcherAgent = new DispatcherAgent(config.getDispatcherConfig().getThreads());
+
+        PriceService priceService = new PriceService(priceReader, timeProviderFactory.get(), logPricePublisher, priceStoreFactory, dispatcherAgent, config);
         priceService.start();
 
         PriceFeedHandler feedHandler = new PriceFeedHandler();

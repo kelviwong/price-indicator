@@ -1,6 +1,10 @@
-package storage;
+package common;
 
 import data.Price;
+import storage.IStore;
+import storage.PriceDequeStore;
+import storage.PriceMemoryMapFileStore;
+import enums.StoreType;
 
 public class PriceStoreFactory {
     StoreType type;

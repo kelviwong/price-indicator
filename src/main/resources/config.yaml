@@ -1,0 +1,5 @@
+dispatcher:
+  threads: 5
+
+vwap:
+  vwapIntervalInMs: 3600000

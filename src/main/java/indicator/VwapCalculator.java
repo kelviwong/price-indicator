@@ -1,19 +1,19 @@
 package indicator;
 
-import common.TimeProvider;
+import config.Config;
 import data.AnalyticData;
 import data.Price;
 import storage.IStore;
 
-import java.util.ArrayDeque;
 import java.util.List;
 
 public class VwapCalculator implements Calculator {
-    private TimeProvider timeProvider;
-    private final static int timeLengthInMin = 60;
+    private final int timeLengthInMs;
+    private final Config config;
 
-    public VwapCalculator(TimeProvider timeProvider) {
-        this.timeProvider = timeProvider;
+    public VwapCalculator(Config config) {
+        this.config = config;
+        timeLengthInMs = config.getVwapConfig().getVwapIntervalInMs();
     }
 
     @Override
@@ -49,7 +49,7 @@ public class VwapCalculator implements Calculator {
         double previousPriceVol = analyticData.getTotalPriceVol();
 
         long now = newData.getTimestamp();
-        long expiredTimeInMills = now - timeLengthInMin * 60 * 1000L;
+        long expiredTimeInMills = now - timeLengthInMs;
 
         store.write(newData);
 

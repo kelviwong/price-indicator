@@ -1,17 +1,29 @@
 package indicator;
 
 import common.MockTimeProvider;
+import config.Config;
 import data.AnalyticData;
 import data.Price;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import storage.PriceDequeStore;
+import util.Data;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class VwapCalculatorTest {
+
+    static Config config;
+
+    @BeforeAll
+    public static void setup() throws IOException {
+        config = Data.getConfig();
+    }
+
     private static void setupData(List<Price> priceList, MockTimeProvider mockTimeProvider) {
         mockTimeProvider.advanceInMinutes(-61);
         priceList.add(new Price("AUD/USD", mockTimeProvider.now(), 12.5, 2000));
@@ -36,7 +48,7 @@ class VwapCalculatorTest {
     public void testVwapPriceWhenVolIsZero() {
         MockTimeProvider mockTimeProvider = new MockTimeProvider();
         PriceDequeStore deque = new PriceDequeStore();
-        Calculator calculator = new VwapCalculator(mockTimeProvider);
+        Calculator calculator = new VwapCalculator(config);
         AnalyticData analyticData = new AnalyticData("AUD/USD");
         List<Price> priceList = new ArrayList<>();
         priceList.add(new Price("AUD/USD", mockTimeProvider.now(), 12.5, 0));
@@ -48,7 +60,7 @@ class VwapCalculatorTest {
     public void testVwapPrice() {
         MockTimeProvider mockTimeProvider = new MockTimeProvider();
         PriceDequeStore deque = new PriceDequeStore();
-        Calculator calculator = new VwapCalculator(mockTimeProvider);
+        Calculator calculator = new VwapCalculator(config);
         AnalyticData analyticData = new AnalyticData("AUD/USD");
         List<Price> priceList;
 

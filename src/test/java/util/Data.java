@@ -1,9 +1,12 @@
 package util;
 
 import common.MockTimeProvider;
+import config.Config;
 import data.Price;
 import data.PriceEvent;
 import publisher.PricePublisher;
+
+import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -20,6 +23,10 @@ public class Data {
         mockTimeProvider.advanceInMinutes(20);
         publisher.publish(new PriceEvent(new Price(currency, mockTimeProvider.now(), 10.4 + adjustPrice, 12000)));
         mockTimeProvider.advanceInMinutes(4);
+    }
+
+    public static Config getConfig() throws IOException {
+        return Config.loadConfig("config.yaml");
     }
 
 }
