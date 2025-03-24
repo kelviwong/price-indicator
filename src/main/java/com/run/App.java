@@ -1,3 +1,5 @@
+package com.run;
+
 import adaptor.PriceAdaptor;
 import common.ITimeProviderFactory;
 import common.LocalDateTimeProviderFactory;
@@ -11,7 +13,7 @@ import feed.PriceFeedHandler;
 import feeder.AbstractQueueFeeder;
 import feeder.CmdPriceFeeder;
 import feeder.PriceFeeder;
-import feeder.StressTester;
+import feeder.SimpleTester;
 import feeder.prompt.CommandClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +28,7 @@ import service.IService;
 import service.PriceService;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 
@@ -54,8 +57,10 @@ public class App {
         PriceAdaptor priceAdaptor = getPriceAdaptor(publisher, cmdPriceFeeder);
         services.add(priceAdaptor);
 
-//        StressTester stressTester = new StressTester(cmdPriceFeeder);
-//        stressTester.start();
+        if (args != null && Arrays.asList(args).contains("simpletest")) {
+            SimpleTester simpleTester = new SimpleTester(cmdPriceFeeder);
+            simpleTester.start();
+        }
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             logger.info("Shutdown hook triggered. Cleaning up...");
