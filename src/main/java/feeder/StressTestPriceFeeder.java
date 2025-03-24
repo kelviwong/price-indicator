@@ -1,8 +1,8 @@
 package feeder;
 
-public class CmdPriceFeeder extends AbstractQueueFeeder<String> {
+public class StressTestPriceFeeder extends AbstractQueueFeeder<String> {
 
-    public CmdPriceFeeder() throws Exception {
+    public StressTestPriceFeeder() throws Exception {
     }
 
     @Override

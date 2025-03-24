@@ -16,9 +16,12 @@ class ConfigTest {
         int vwapIntervalInMs = config.getVwapConfig().getVwapIntervalInMs();
         StoreType storeType = config.getPriceServiceConfig().getStoreType();
 
+        int capacity = config.getQueueConfig().getCapacity();
+
         assertEquals(5, threads);
         assertEquals(3600000, vwapIntervalInMs);
         assertEquals(StoreType.DEQUE, storeType);
+        assertEquals(10000, capacity);
     }
 
 }

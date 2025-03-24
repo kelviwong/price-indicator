@@ -32,9 +32,15 @@ public class Config {
         private StoreType storeType;
     }
 
+    @Data
+    public static class QueueConfig {
+        private int capacity;
+    }
+
     private DispatcherConfig dispatcherConfig;
     private VwapConfig vwapConfig;
     private PriceServiceConfig priceServiceConfig;
+    private QueueConfig queueConfig;
 
     public static Config loadConfig(String filePath) throws IOException {
         Yaml yaml = new Yaml();
@@ -76,6 +82,11 @@ public class Config {
         PriceServiceConfig priceServiceConfig = new PriceServiceConfig();
         priceServiceConfig.setStoreType(StoreType.valueOf((String) map.get("storeType")));
         config.setPriceServiceConfig(priceServiceConfig);
+
+        map = (Map<String, Object>) obj.get("queue");
+        QueueConfig queueConfig = new QueueConfig();
+        queueConfig.setCapacity((Integer) map.get("capacity"));
+        config.setQueueConfig(queueConfig);
 
         return config;
     }

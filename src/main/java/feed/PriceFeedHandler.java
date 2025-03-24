@@ -1,20 +1,32 @@
 package feed;
 
 import data.Price;
+import vaildation.PriceValidationRule;
+import vaildation.ValidationRule;
+import vaildation.VolumeValidationRule;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.util.HashSet;
 import java.util.Locale;
+import java.util.Set;
 
 public class PriceFeedHandler implements FeedHandler<String> {
+    private final Set<ValidationRule<Price>> validationRules;
     DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("h:mm a", Locale.ENGLISH);
     final StringBuilder sb = new StringBuilder();
+
+    public PriceFeedHandler() {
+        validationRules = new HashSet<>();
+        validationRules.add(new PriceValidationRule());
+        validationRules.add(new VolumeValidationRule());
+    }
 
     // The price feed data
     // TimeStamp currencyPair price volume
     @Override
     public Price process(String feed) throws Exception {
-       // 9:30 AM AUD/USD 0.6905 106,198
+        // 9:30 AM AUD/USD 0.6905 106,198
 
         String[] feedSplit = feed.split(" ");
         if (feedSplit.length < 5) {
@@ -26,7 +38,14 @@ public class PriceFeedHandler implements FeedHandler<String> {
 
         double price = Double.parseDouble(feedSplit[3]);
         long volume = parseLong(feedSplit[4], ',');
-        return new Price(feedSplit[2], time, price, volume);
+        Price ultimatePrice = new Price(feedSplit[2], time, price, volume);
+        for (ValidationRule<Price> rule : validationRules) {
+            String check = rule.check(ultimatePrice);
+            if (!check.isEmpty()) {
+                throw new Exception(check);
+            }
+        }
+        return ultimatePrice;
     }
 
     private long parseLong(String volumeStr, char removeChar) {

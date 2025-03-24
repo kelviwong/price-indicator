@@ -8,8 +8,10 @@ import data.PriceEvent;
 import dispatcher.DispatcherAgent;
 import enums.StoreType;
 import feed.PriceFeedHandler;
+import feeder.AbstractQueueFeeder;
 import feeder.CmdPriceFeeder;
 import feeder.PriceFeeder;
+import feeder.StressTester;
 import feeder.prompt.CommandClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,12 +39,12 @@ public class App {
         Config config = Config.loadConfig("config.yaml");
         logger.info("Loaded config: " + config);
 
-        PriceFeeder<String> cmdPriceFeeder = new CmdPriceFeeder();
+        AbstractQueueFeeder<String> cmdPriceFeeder = new CmdPriceFeeder();
 
         CommandClient client = getCommandClient(cmdPriceFeeder);
         services.add(client);
 
-        BlockingQueue<PriceEvent> priceEventQueue = QueueFactory.createQueue(10000, QueueType.BACKOFF);
+        BlockingQueue<PriceEvent> priceEventQueue = QueueFactory.createQueue(config.getQueueConfig().getCapacity(), QueueType.BACKOFF);
 
         PricePublisher<PriceEvent> publisher = new PricePublisher<>(priceEventQueue);
 
@@ -51,6 +53,9 @@ public class App {
 
         PriceAdaptor priceAdaptor = getPriceAdaptor(publisher, cmdPriceFeeder);
         services.add(priceAdaptor);
+
+//        StressTester stressTester = new StressTester(cmdPriceFeeder);
+//        stressTester.start();
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             logger.info("Shutdown hook triggered. Cleaning up...");

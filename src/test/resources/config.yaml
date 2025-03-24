@@ -6,3 +6,6 @@ vwap:
 
 priceService:
   storeType: DEQUE
+
+queue:
+  capacity: 10000

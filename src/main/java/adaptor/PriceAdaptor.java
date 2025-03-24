@@ -13,7 +13,7 @@ import service.IService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class PriceAdaptor implements IService, Adaptor {
+public class PriceAdaptor implements IService, IAdaptor {
     private final ExecutorService executorService;
     private FeedHandler<String> feedHandler;
     private Publisher<PriceEvent> publisher;
@@ -31,6 +31,7 @@ public class PriceAdaptor implements IService, Adaptor {
         executorService = Executors.newSingleThreadExecutor(new NamedThreadFactory("PriceAdaptor"));
     }
 
+    @Override
     public void process() throws Exception {
         String data = feeder.getData();
         Price price = feedHandler.process(data);
@@ -39,6 +40,7 @@ public class PriceAdaptor implements IService, Adaptor {
 
     }
 
+    @Override
     public void start() {
         logger.info("Starting adaptor on Thead");
         executorService.submit(() -> {
@@ -52,6 +54,7 @@ public class PriceAdaptor implements IService, Adaptor {
         });
     }
 
+    @Override
     public void stop() {
         logger.info("Stopping adaptor");
         this.isStop = true;
