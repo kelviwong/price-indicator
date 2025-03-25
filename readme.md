@@ -28,6 +28,7 @@ Design:
 12. we can add few more indicator, like RSI or EMA if close price is there.
 13. BackOffQueue to handle when it exceeds the capacity.
 14. There is a SimpleRun class in Test package which will inject certain amount of record (e.g. 10000) to test.
+15. verify mutlithread result is in manual_cal.xlsx
 
 For memory usage
 1. Storing Price in Deque involve

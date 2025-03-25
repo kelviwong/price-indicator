@@ -4,23 +4,19 @@ import config.Config;
 import data.AnalyticData;
 import data.IndicatorEvent;
 import data.Price;
-import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import publisher.LogPublisher;
 import publisher.Publisher;
 import storage.IStore;
 
-public class VwapTask<T extends Price> implements Runnable {
+public class VwapTask<T extends Price> extends Task<T> {
     private final AnalyticData analyticData;
     private final IStore<Price> priceStore;
     private final Calculator calculator;
     private final Publisher<IndicatorEvent> publisher;
     private static final Logger logger = LoggerFactory.getLogger(LogPublisher.class);
     private final Config config;
-
-    @Setter
-    T data;
 
     public VwapTask(AnalyticData analyticData, IStore<Price> priceStore, Publisher<IndicatorEvent> publisher, Calculator calculator, Config config) {
         this.analyticData = analyticData;

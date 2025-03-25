@@ -1,5 +1,6 @@
 package com.run;
 
+import Util.ServiceUtil;
 import adaptor.PriceAdaptor;
 import common.ITimeProviderFactory;
 import common.LocalDateTimeProviderFactory;
@@ -7,6 +8,7 @@ import common.PriceStoreFactory;
 import config.Config;
 import data.IndicatorEvent;
 import data.PriceEvent;
+import dispatcher.DispatchType;
 import dispatcher.DispatcherAgent;
 import enums.StoreType;
 import feed.PriceFeedHandler;
@@ -66,9 +68,7 @@ public class App {
             logger.info("Shutdown hook triggered. Cleaning up...");
             if (!services.isEmpty()) {
                 for (IService service : services) {
-                    if (service != null) {
-                        service.stop();
-                    }
+                    ServiceUtil.quietlyStop(service);
                 }
             }
         }));
@@ -96,7 +96,7 @@ public class App {
         StoreType storeType = config.getPriceServiceConfig().getStoreType();
         PriceStoreFactory priceStoreFactory = new PriceStoreFactory(storeType, "prod");
 
-        DispatcherAgent dispatcherAgent = new DispatcherAgent(config.getDispatcherConfig().getThreads());
+        DispatcherAgent dispatcherAgent = new DispatcherAgent(config.getDispatcherConfig().getThreads(), DispatchType.BY_SYMBOL);
 
         PriceService priceService = new PriceService(priceReader, timeProviderFactory.get(), logPricePublisher, priceStoreFactory, dispatcherAgent, config);
         priceService.start();

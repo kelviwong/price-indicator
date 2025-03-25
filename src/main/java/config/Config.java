@@ -1,5 +1,6 @@
 package config;
 
+import dispatcher.DispatchType;
 import enums.StoreType;
 import lombok.Data;
 import lombok.Getter;
@@ -20,6 +21,7 @@ public class Config {
     @Data
     public static class DispatcherConfig {
         private int threads;
+        private DispatchType dispatchType;
     }
 
     @Data
@@ -71,6 +73,7 @@ public class Config {
         Map<String, Object> map = (Map<String, Object>) obj.get("dispatcher");
         DispatcherConfig dispatcherConfig = new DispatcherConfig();
         dispatcherConfig.setThreads((Integer) map.get("threads"));
+        dispatcherConfig.setDispatchType(DispatchType.valueOf((String) map.get("dispatchType")));
         config.setDispatcherConfig(dispatcherConfig);
 
         map = (Map<String, Object>) obj.get("vwap");

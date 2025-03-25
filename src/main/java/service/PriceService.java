@@ -1,5 +1,6 @@
 package service;
 
+import Util.ServiceUtil;
 import common.NamedThreadFactory;
 import common.TimeProvider;
 import config.Config;
@@ -76,10 +77,11 @@ public class PriceService implements IService {
                             return firstData;
                         });
 
-                        VwapTask<Price> VwapTask = new VwapTask<>(analyticData, priceStore, publisher, vwapCalculator, config);
-                        VwapTask.setData(data);
+                        //TODO: should make this better to avoid this creation of task.
+                        VwapTask<Price> vwapTask = new VwapTask<>(analyticData, priceStore, publisher, vwapCalculator, config);
+                        vwapTask.setData(data);
 
-                        dispatcherAgent.dispatchTask(data.getCurrency(), VwapTask);
+                        dispatcherAgent.dispatchTask(data.getCurrency(), vwapTask);
                     }
                 } catch (Exception e) {
                     logger.error("Error processing price event: " + event, e);
@@ -98,7 +100,7 @@ public class PriceService implements IService {
             }
         }
 
-        dispatcherAgent.stop();
+        ServiceUtil.quietlyStop(dispatcherAgent);
 
         isStopped = true;
     }
