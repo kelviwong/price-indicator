@@ -1,6 +1,6 @@
 package data;
 
-public class IndicatorEvent extends Event<AnalyticData> {
+public class IndicatorEvent extends Event<AnalyticData> implements Resettable{
     public IndicatorEvent(AnalyticData data) {
         super(data);
     }
@@ -10,5 +10,10 @@ public class IndicatorEvent extends Event<AnalyticData> {
         return "IndicatorEvent{" +
                 "data=" + data +
                 '}';
+    }
+
+    @Override
+    public void reset() {
+        data = null;
     }
 }
