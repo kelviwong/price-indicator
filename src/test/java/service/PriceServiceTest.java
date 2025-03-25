@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 
-import static org.junit.jupiter.api.Assaertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static util.Data.generateDifferentData;
 import static util.Data.setup59MinutesOldData;
