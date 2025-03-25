@@ -17,7 +17,6 @@ public class DispatcherAgent implements IService {
 
     private final Object2IntHashMap<String> symbolMappedThread;
     private final ExecutorService[] executors;
-//    private long counter;
     private final DispatchStrategy dispatchStrategy;
 
     public DispatcherAgent(int numOfThread, DispatchStrategy dispatchStrategy) {
@@ -43,7 +42,7 @@ public class DispatcherAgent implements IService {
         }
 
         ExecutorService executorService = executors[threadNo];
-        executorService.submit(task);
+        executorService.execute(task);
         return executorService;
     }
 
