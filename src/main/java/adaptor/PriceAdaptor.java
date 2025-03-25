@@ -15,9 +15,9 @@ import java.util.concurrent.Executors;
 
 public class PriceAdaptor implements IService, IAdaptor {
     private final ExecutorService executorService;
-    private FeedHandler<String> feedHandler;
-    private Publisher<PriceEvent> publisher;
-    private PriceFeeder<String> feeder;
+    private final FeedHandler<String> feedHandler;
+    private final Publisher<PriceEvent> publisher;
+    private final PriceFeeder<String> feeder;
     private volatile boolean isStop;
 
     private static final Logger logger = LoggerFactory.getLogger(PriceAdaptor.class);
@@ -43,7 +43,7 @@ public class PriceAdaptor implements IService, IAdaptor {
     @Override
     public void start() {
         logger.info("Starting adaptor on Thead");
-        executorService.submit(() -> {
+        executorService.execute(() -> {
             while (!isStop) {
                 try {
                     process();

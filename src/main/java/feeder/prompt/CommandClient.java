@@ -31,7 +31,7 @@ public class CommandClient implements IService {
     public void start() {
         try {
             executorService = Executors.newSingleThreadExecutor(new NamedThreadFactory("CommandClient"));
-            executorService.submit(this::LoadPrompt);
+            executorService.execute(this::LoadPrompt);
         } catch (Exception e) {
             systemOutPrinter.print(e.getMessage());
         }

@@ -55,7 +55,7 @@ public class PriceService implements IService {
     @Override
     public void start() {
         logger.info("Start Price Service");
-        executorService.submit(() -> {
+        executorService.execute(() -> {
             while (!isStopped) {
                 PriceEvent event = null;
                 try {
