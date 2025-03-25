@@ -1,18 +1,19 @@
 package service;
 
 import common.MockTimeProvider;
+import common.PriceStoreFactory;
 import config.Config;
 import data.IndicatorEvent;
 import data.Price;
 import data.PriceEvent;
-import dispatcher.DispatchType;
 import dispatcher.DispatcherAgent;
+import dispatcher.HashSymbolDispatchStrategy;
+import dispatcher.RoundRobinDispatchStrategy;
+import enums.StoreType;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import publisher.PricePublisher;
 import publisher.PriceReader;
-import common.PriceStoreFactory;
-import enums.StoreType;
 import queue.QueueFactory;
 import queue.QueueType;
 import util.Data;
@@ -22,10 +23,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assaertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static util.Data.generateDifferentData;
 import static util.Data.setup59MinutesOldData;
@@ -60,7 +60,7 @@ class PriceServiceTest {
         PricePublisher<PriceEvent> ignessPublisher = new PricePublisher<>(priceEventArrayBlockingQueue);
         PriceReader<PriceEvent> priceReader = new PriceReader<>(priceEventArrayBlockingQueue);
         PriceStoreFactory priceStoreFactory = new PriceStoreFactory(storeType, "test2");
-        DispatcherAgent dispatcherAgent = new DispatcherAgent(config.getDispatcherConfig().getThreads(), DispatchType.BY_SYMBOL);
+        DispatcherAgent dispatcherAgent = new DispatcherAgent(config.getDispatcherConfig().getThreads(), new HashSymbolDispatchStrategy());
         PriceService priceService = new PriceService(priceReader, timeProvider, publisher, priceStoreFactory, dispatcherAgent, config);
         priceService.start();
         String currency = "AUD/USD";
@@ -123,7 +123,7 @@ class PriceServiceTest {
         PriceStoreFactory priceStoreFactory = new PriceStoreFactory(StoreType.DEQUE, "test2");
 
         // use 3 threads
-        DispatcherAgent dispatcherAgent = new DispatcherAgent(3, DispatchType.ROUND_ROBIN);
+        DispatcherAgent dispatcherAgent = new DispatcherAgent(3, new RoundRobinDispatchStrategy());
         PriceService priceService = new PriceService(priceReader, timeProvider, publisher, priceStoreFactory, dispatcherAgent, config);
         priceService.start();
 

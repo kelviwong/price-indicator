@@ -8,8 +8,7 @@ import common.PriceStoreFactory;
 import config.Config;
 import data.IndicatorEvent;
 import data.PriceEvent;
-import dispatcher.DispatchType;
-import dispatcher.DispatcherAgent;
+import dispatcher.*;
 import enums.StoreType;
 import feed.PriceFeedHandler;
 import feeder.AbstractQueueFeeder;
@@ -96,7 +95,9 @@ public class App {
         StoreType storeType = config.getPriceServiceConfig().getStoreType();
         PriceStoreFactory priceStoreFactory = new PriceStoreFactory(storeType, "prod");
 
-        DispatcherAgent dispatcherAgent = new DispatcherAgent(config.getDispatcherConfig().getThreads(), DispatchType.BY_SYMBOL);
+        DispatchStrategy dispatchStrategy = config.getDispatcherConfig().getDispatchType() == DispatchType.BY_SYMBOL ? new HashSymbolDispatchStrategy() : new RoundRobinDispatchStrategy();
+
+        DispatcherAgent dispatcherAgent = new DispatcherAgent(config.getDispatcherConfig().getThreads(), dispatchStrategy);
 
         PriceService priceService = new PriceService(priceReader, timeProviderFactory.get(), logPricePublisher, priceStoreFactory, dispatcherAgent, config);
         priceService.start();

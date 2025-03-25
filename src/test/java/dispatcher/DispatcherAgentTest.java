@@ -9,7 +9,7 @@ class DispatcherAgentTest {
 
     @Test
     public void testDispatcherAgentShouldAlwaysUseSameThreadWithSameCode() {
-        DispatcherAgent dispatcherAgent = new DispatcherAgent(5, DispatchType.BY_SYMBOL);
+        DispatcherAgent dispatcherAgent = new DispatcherAgent(5, new HashSymbolDispatchStrategy());
         dispatcherAgent.start();
         String symbolA = "AUD/USD";
         String symbolB = "EUR/USD";
@@ -33,7 +33,7 @@ class DispatcherAgentTest {
 
     @Test
     public void testDispatcherShouldRoundRobinTheThread() {
-        DispatcherAgent dispatcherAgent = new DispatcherAgent(5, DispatchType.ROUND_ROBIN);
+        DispatcherAgent dispatcherAgent = new DispatcherAgent(5, new RoundRobinDispatchStrategy());
         dispatcherAgent.start();
         String symbolA = "AUD/USD";
         String symbolB = "EUR/USD";
@@ -66,7 +66,8 @@ class DispatcherAgentTest {
 
     @Test
     public void testDispatcherShouldBySymbolThread() {
-        DispatcherAgent dispatcherAgent = new DispatcherAgent(5, DispatchType.BY_SYMBOL);
+        HashSymbolDispatchStrategy dispatchStrategy = new HashSymbolDispatchStrategy();
+        DispatcherAgent dispatcherAgent = new DispatcherAgent(5, dispatchStrategy);
         dispatcherAgent.start();
         String symbolA = "AUD/USD";
         String symbolB = "EUR/USD";
@@ -77,9 +78,9 @@ class DispatcherAgentTest {
         ExecutorService executorServiceA = dispatcherAgent.dispatchTask(symbolA, () -> {});
         ExecutorService executorServiceB = dispatcherAgent.dispatchTask(symbolB, () -> {});
 
-        int threadNo = dispatcherAgent.hashThead(symbolA);
-        int threadNo2 = dispatcherAgent.hashThead(symbolB);
-        int threadNo3 = dispatcherAgent.hashThead(symbolC);
+        int threadNo = dispatchStrategy.getThreadId(symbolA, 5);
+        int threadNo2 = dispatchStrategy.getThreadId(symbolB, 5);
+        int threadNo3 = dispatchStrategy.getThreadId(symbolC, 5);
 
         //expect to be putting in-order executors
         assertEquals(executors[threadNo], executorServiceA);

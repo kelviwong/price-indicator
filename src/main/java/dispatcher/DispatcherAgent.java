@@ -17,12 +17,12 @@ public class DispatcherAgent implements IService {
 
     private final Object2IntHashMap<String> symbolMappedThread;
     private final ExecutorService[] executors;
-    private final DispatchType dispatchType;
-    private long counter;
+//    private long counter;
+    private final DispatchStrategy dispatchStrategy;
 
-    public DispatcherAgent(int numOfThread, DispatchType dispatchType) {
+    public DispatcherAgent(int numOfThread, DispatchStrategy dispatchStrategy) {
         this.numOfThread = numOfThread;
-        this.dispatchType = dispatchType;
+        this.dispatchStrategy = dispatchStrategy;
 
         executors = new ExecutorService[numOfThread];
 
@@ -32,30 +32,19 @@ public class DispatcherAgent implements IService {
         }
 
         symbolMappedThread = new Object2IntHashMap<>(1000, 0.65f, -1);
-        logger.info("Creating Dispatcher Agent, numOfThread: {}, dispatchType: {}", numOfThread, dispatchType);
+        logger.info("Creating Dispatcher Agent, numOfThread: {}, dispatchType: {}", numOfThread, dispatchStrategy);
     }
 
     public ExecutorService dispatchTask(String symbol, Runnable task) {
         int threadNo = symbolMappedThread.getValue(symbol);
         if (threadNo == symbolMappedThread.missingValue()) {
-            threadNo = hashThead(symbol);
+            threadNo = dispatchStrategy.getThreadId(symbol, numOfThread);
             symbolMappedThread.put(symbol, threadNo);
         }
 
         ExecutorService executorService = executors[threadNo];
         executorService.submit(task);
         return executorService;
-    }
-
-    public int hashThead(String symbol) {
-        int hash;
-        if (dispatchType == DispatchType.BY_SYMBOL) {
-            hash = Math.abs(symbol.hashCode()) % numOfThread;
-        } else {
-            hash = (int) (counter % numOfThread);
-            counter++;
-        }
-        return hash;
     }
 
     public ExecutorService[] getExecutors() {

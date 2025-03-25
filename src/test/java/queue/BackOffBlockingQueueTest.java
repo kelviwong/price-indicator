@@ -21,7 +21,7 @@ class BackOffBlockingQueueTest {
     @BeforeEach
     public void setUp() throws Exception {
         timeProvider = new MockTimeProvider();
-        BackOffStrategy<PriceEvent> strategy = new RetryThenDropStrategy<>(3, 100,new LogDropConsumer<>());
+        BackOffStrategy<PriceEvent> strategy = new RetryThenDropStrategy<>(3, 1000,new LogDropConsumer<>());
         backOffBlockingQueue = QueueFactory.createQueue(1, QueueType.BACKOFF, strategy);
     }
 
@@ -47,7 +47,7 @@ class BackOffBlockingQueueTest {
         // when there is something take
         new Thread(() -> {
             try {
-                TimeUnit.MICROSECONDS.sleep(50);
+                TimeUnit.MICROSECONDS.sleep(10);
                 backOffBlockingQueue.take();
             } catch (InterruptedException ignored) {
             }

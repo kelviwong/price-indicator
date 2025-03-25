@@ -1,15 +1,10 @@
 package util;
 
 import data.IndicatorEvent;
-import data.Price;
-import data.PriceEvent;
 import lombok.Getter;
 import publisher.PricePublisher;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -32,6 +27,7 @@ public class MockPriceEventPublisher<T extends IndicatorEvent> extends PricePubl
 
     public void clearLastEvent() {
         lastEvent = null;
+        lastEvents.clear();
     }
 
     public Map<String, T> getResult() {
