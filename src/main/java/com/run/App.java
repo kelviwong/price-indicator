@@ -19,10 +19,7 @@ import feeder.prompt.CommandClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import printer.SystemOutPrinter;
-import publisher.LogPublisher;
-import publisher.PricePublisher;
-import publisher.PriceReader;
-import publisher.Publisher;
+import publisher.*;
 import queue.QueueFactory;
 import queue.QueueType;
 import service.IService;
@@ -88,7 +85,7 @@ public class App {
     }
 
     private static PriceService getPriceService(BlockingQueue<PriceEvent> priceEventQueue, Config config) {
-        Publisher<IndicatorEvent> logPricePublisher = new LogPublisher<>();
+        Publisher<IndicatorEvent> logPricePublisher = new PooledPublisher(new LogPublisher<>(), () -> new IndicatorEvent(null));
         PriceReader<PriceEvent> priceReader = new PriceReader<>(priceEventQueue);
         ITimeProviderFactory timeProviderFactory = new LocalDateTimeProviderFactory();
 

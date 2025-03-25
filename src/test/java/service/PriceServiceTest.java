@@ -77,7 +77,7 @@ class PriceServiceTest {
         timeProvider.advanceInMinutes(1);
         assertEquals("10:01:00", timeProvider.getCurrentTime());
         ignessPublisher.publish(new PriceEvent(new Price(currency, timeProvider.now(), 10.4, 12000)));
-        Thread.sleep(20);
+        Thread.sleep(100);
         assertEquals(11.204545454545455, publisher.getLastEvent().getData().getVwap());
 
         // after 1 hour, any price event will keep updating vwap

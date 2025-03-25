@@ -18,7 +18,7 @@ public class ObjectPool<T extends Resettable> {
         this.supplier = supplier;
     }
 
-    public T acquire() {
+    public synchronized T acquire() {
         if (pool.isEmpty()) {
             pool.add(supplier.get());
         }
@@ -30,7 +30,7 @@ public class ObjectPool<T extends Resettable> {
         return pool.size();
     }
 
-    public void release(T obj) {
+    public synchronized void release(T obj) {
         obj.reset();
         pool.add(obj);
     }

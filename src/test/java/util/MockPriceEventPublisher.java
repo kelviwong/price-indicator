@@ -20,12 +20,11 @@ public class MockPriceEventPublisher<T extends IndicatorEvent> extends PricePubl
     public MockPriceEventPublisher(BlockingQueue<T> queue) {
         super(queue);
     }
-
     @Override
     public void publish(T data) {
         lastEvent = data;
         lastEvents.put(data.getData().getCurrency(), data);
-        logger.info("Publishing: {}", data);
+//        logger.info("Publishing: {}", data);
         super.publish(data);
     }
 
