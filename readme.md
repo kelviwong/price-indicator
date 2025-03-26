@@ -29,6 +29,7 @@ Design:
 13. BackOffQueue to handle when it exceeds the capacity.
 14. There is a SimpleRun class in Test package which will inject certain amount of record (e.g. 10000) to test.
 15. verify mutlithread result is in manual_cal.xlsx
+16. Updated to use event loop and handler to process vwap
 
 For memory usage
 1. Storing Price in Deque involve

@@ -36,7 +36,7 @@ import static util.Data.setup59MinutesOldData;
 
 class PriceServiceTest {
     static Config config;
-    private Supplier<PriceWorker> supplier;
+    private Supplier<EventWorker> supplier;
     private BlockingQueue<IndicatorEvent> indicatorEventArrayBlockingQueue;
     private BlockingQueue<PriceEvent> priceEventArrayBlockingQueue;
     private MockPriceEventPublisher<IndicatorEvent> publisher;
@@ -74,8 +74,8 @@ class PriceServiceTest {
 
         supplier = () -> {
             BlockingQueue<PriceEvent> taskQueue = new ArrayBlockingQueue<>(1000);
-            PriceWorker priceWorker = new PriceWorker(taskQueue, publisher, config, priceStoreFactory);
-            priceWorker.addCalculatorHandler(new VwapCalculator(config));
+            EventWorker priceWorker = new EventWorker(taskQueue);
+            priceWorker.registerHandler(new VwapPriceEventHandler(priceStoreFactory, new VwapCalculator(config), config, publisher));
             return priceWorker;
         };
 
@@ -143,8 +143,8 @@ class PriceServiceTest {
 
         supplier = () -> {
             BlockingQueue<PriceEvent> taskQueue = new ArrayBlockingQueue<>(1000);
-            PriceWorker priceWorker = new PriceWorker(taskQueue, publisher, config, priceStoreFactory);
-            priceWorker.addCalculatorHandler(new VwapCalculator(config));
+            EventWorker priceWorker = new EventWorker(taskQueue);
+            priceWorker.registerHandler(new VwapPriceEventHandler(priceStoreFactory, new VwapCalculator(config), config, publisher));
             return priceWorker;
         };
 

@@ -25,7 +25,8 @@ import queue.QueueFactory;
 import queue.QueueType;
 import service.IService;
 import service.PriceService;
-import service.PriceWorker;
+import service.EventWorker;
+import service.VwapPriceEventHandler;
 
 import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -97,8 +98,8 @@ public class App {
 
         DispatcherAgent dispatcherAgent = new DispatcherAgent(config.getDispatcherConfig().getThreads(), dispatchStrategy, () -> {
             BlockingQueue<PriceEvent> taskQueue = new ArrayBlockingQueue<>(1000);
-            PriceWorker priceWorker = new PriceWorker(taskQueue, logPricePublisher, config, priceStoreFactory);
-            priceWorker.addCalculatorHandler(new VwapCalculator(config));
+            EventWorker<PriceEvent> priceWorker = new EventWorker<>(taskQueue);
+            priceWorker.registerHandler(new VwapPriceEventHandler(priceStoreFactory, new VwapCalculator(config), config, logPricePublisher));
             return priceWorker;
         });
 

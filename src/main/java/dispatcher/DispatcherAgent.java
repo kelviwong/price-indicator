@@ -1,20 +1,18 @@
 package dispatcher;
 
 import common.NamedThreadFactory;
-import data.PriceEvent;
 import org.agrona.collections.Object2IntHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import service.IService;
-import service.PriceWorker;
+import service.EventWorker;
 
-import java.util.Queue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
-public class DispatcherAgent implements IService {
+public class DispatcherAgent<T> implements IService {
     private static final Logger logger = LoggerFactory.getLogger(DispatcherAgent.class);
 
     int numOfThread;
@@ -23,21 +21,21 @@ public class DispatcherAgent implements IService {
     private final ExecutorService[] executors;
     private final DispatchStrategy dispatchStrategy;
 
-    private final PriceWorker[] workers;
+    private final EventWorker[] workers;
 
-    public DispatcherAgent(int numOfThread, DispatchStrategy dispatchStrategy, Supplier<PriceWorker> supplier) {
+    public DispatcherAgent(int numOfThread, DispatchStrategy dispatchStrategy, Supplier<EventWorker<T>> supplier) {
         this.numOfThread = numOfThread;
         this.dispatchStrategy = dispatchStrategy;
 
         executors = new ExecutorService[numOfThread];
-        workers = new PriceWorker[numOfThread];
+        workers = new EventWorker[numOfThread];
 
         for (int i = 0; i < numOfThread; i++) {
             //TODO: we can further improve here to allow bind to single cpu core
             executors[i] = Executors.newSingleThreadExecutor(new NamedThreadFactory("DispatcherAgent-" + i));
-            PriceWorker worker = supplier.get();
-            executors[i].execute(worker);
+            EventWorker worker = supplier.get();
             workers[i] = worker;
+            executors[i].execute(worker);
         }
 
         symbolMappedThread = new Object2IntHashMap<>(1000, 0.65f, -1);
@@ -56,15 +54,14 @@ public class DispatcherAgent implements IService {
         return executorService;
     }
 
-    public PriceWorker dispatchQueue(String symbol, PriceEvent event) {
+    public EventWorker dispatchQueue(String symbol, T event) {
         int threadNo = symbolMappedThread.getValue(symbol);
         if (threadNo == symbolMappedThread.missingValue()) {
             threadNo = dispatchStrategy.getThreadId(symbol, numOfThread);
             symbolMappedThread.put(symbol, threadNo);
         }
-        PriceWorker worker = workers[threadNo];
-        Queue<PriceEvent> taskQueue = worker.getTaskQueue();
-        taskQueue.add(event);
+        EventWorker worker = workers[threadNo];
+        worker.submit(event);
 
         return worker;
     }
@@ -82,7 +79,7 @@ public class DispatcherAgent implements IService {
     public void stop() {
         logger.info("Stopping DispatcherAgent");
         if (workers != null) {
-            for (PriceWorker worker : workers){
+            for (EventWorker worker : workers){
                 worker.stop();
             }
         }

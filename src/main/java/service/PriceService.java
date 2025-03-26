@@ -9,9 +9,6 @@ import data.IndicatorEvent;
 import data.Price;
 import data.PriceEvent;
 import dispatcher.DispatcherAgent;
-import indicator.Calculator;
-import indicator.VwapTask;
-import indicator.VwapCalculator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import publisher.PriceReader;
@@ -28,7 +25,6 @@ import java.util.concurrent.Executors;
 public class PriceService implements IService {
     private static final Logger logger = LoggerFactory.getLogger(PriceService.class);
     private final ExecutorService executorService;
-    private final Calculator vwapCalculator;
     private final DispatcherAgent dispatcherAgent;
     private volatile boolean isStopped = false;
     private final PriceReader<PriceEvent> priceReader;
@@ -41,7 +37,6 @@ public class PriceService implements IService {
     public PriceService(PriceReader<PriceEvent> priceReader, TimeProvider timeProvider,
                         Publisher<IndicatorEvent> publisher, PriceStoreFactory priceStoreFactory, DispatcherAgent dispatcherAgent,
                         Config config) {
-        this.vwapCalculator = new VwapCalculator(config);
         this.executorService = Executors.newSingleThreadExecutor(new NamedThreadFactory("PriceService"));
         this.priceReader = priceReader;
         this.publisher = publisher;

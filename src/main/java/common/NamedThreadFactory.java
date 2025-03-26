@@ -17,6 +17,7 @@ public class NamedThreadFactory implements ThreadFactory {
 
     @Override
     public Thread newThread(Runnable r) {
+        //TODO: we can spin core in here
         Thread thread = new Thread(r);
         thread.setName(baseName + "-" + counter.getAndIncrement());
         thread.setUncaughtExceptionHandler((t, e) -> {

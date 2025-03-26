@@ -4,15 +4,12 @@ import common.PriceStoreFactory;
 import config.Config;
 import data.Price;
 import data.PriceEvent;
-import indicator.VwapCalculator;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import publisher.PricePublisher;
-import service.PriceWorker;
+import service.EventWorker;
 
-import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
@@ -29,13 +26,13 @@ class DispatcherAgentTest {
 
     @Mock
     PriceStoreFactory priceStoreFactory;
-    private Supplier<PriceWorker> supplier;
+    private Supplier<EventWorker> supplier;
 
     @BeforeEach
     public void setUp() {
         supplier = () -> {
             BlockingQueue<PriceEvent> taskQueue = new ArrayBlockingQueue<>(1000);
-            PriceWorker priceWorker = new PriceWorker(taskQueue, publisher, config, priceStoreFactory);
+            EventWorker priceWorker = new EventWorker(taskQueue);
 //            priceWorker.addCalculatorHandler(new VwapCalculator(config));
             return priceWorker;
         };
@@ -77,11 +74,11 @@ class DispatcherAgentTest {
         String symbolB = "EUR/USD";
         String symbolC = "JPY/USD";
         PriceEvent event = new PriceEvent(new Price());
-        PriceWorker workerA = dispatcherAgent.dispatchQueue(symbolA, event);
-        PriceWorker workerB = dispatcherAgent.dispatchQueue(symbolB, event);
-        PriceWorker workerC = dispatcherAgent.dispatchQueue(symbolC, event);
+        EventWorker workerA = dispatcherAgent.dispatchQueue(symbolA, event);
+        EventWorker workerB = dispatcherAgent.dispatchQueue(symbolB, event);
+        EventWorker workerC = dispatcherAgent.dispatchQueue(symbolC, event);
 
-        PriceWorker worker = dispatcherAgent.dispatchQueue(symbolB, event);
+        EventWorker worker = dispatcherAgent.dispatchQueue(symbolB, event);
         assertEquals(workerB, worker);
         worker = dispatcherAgent.dispatchQueue(symbolA, event);
         assertEquals(workerA, worker);
