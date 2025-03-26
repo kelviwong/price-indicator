@@ -7,7 +7,7 @@ import storage.IStore;
 
 import java.util.List;
 
-public class VwapCalculator implements Calculator {
+public class VwapCalculator implements ICalculator {
     private final int timeLengthInMs;
     private final Config config;
 

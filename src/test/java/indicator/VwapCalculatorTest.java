@@ -48,7 +48,7 @@ class VwapCalculatorTest {
     public void testVwapPriceWhenVolIsZero() {
         MockTimeProvider mockTimeProvider = new MockTimeProvider();
         PriceDequeStore deque = new PriceDequeStore("AUD/USD");
-        Calculator calculator = new VwapCalculator(config);
+        ICalculator calculator = new VwapCalculator(config);
         AnalyticData analyticData = new AnalyticData("AUD/USD");
         List<Price> priceList = new ArrayList<>();
         priceList.add(new Price("AUD/USD", mockTimeProvider.now(), 12.5, 0));
@@ -60,7 +60,7 @@ class VwapCalculatorTest {
     public void testVwapPrice() {
         MockTimeProvider mockTimeProvider = new MockTimeProvider();
         PriceDequeStore deque = new PriceDequeStore("AUD/USD");
-        Calculator calculator = new VwapCalculator(config);
+        ICalculator calculator = new VwapCalculator(config);
         AnalyticData analyticData = new AnalyticData("AUD/USD");
         List<Price> priceList;
 

@@ -11,11 +11,11 @@ import storage.IStore;
 public class VwapTask<T extends Price> extends Task<T> {
     private final AnalyticData analyticData;
     private final IStore<Price> priceStore;
-    private final Calculator calculator;
+    private final ICalculator calculator;
     private final Publisher<IndicatorEvent> publisher;
     private final Config config;
 
-    public VwapTask(AnalyticData analyticData, IStore<Price> priceStore, Publisher<IndicatorEvent> publisher, Calculator calculator, Config config) {
+    public VwapTask(AnalyticData analyticData, IStore<Price> priceStore, Publisher<IndicatorEvent> publisher, ICalculator calculator, Config config) {
         this.analyticData = analyticData;
         this.priceStore = priceStore;
         this.publisher = publisher;

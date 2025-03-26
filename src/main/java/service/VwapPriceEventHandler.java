@@ -6,7 +6,7 @@ import data.AnalyticData;
 import data.IndicatorEvent;
 import data.Price;
 import data.PriceEvent;
-import indicator.Calculator;
+import indicator.ICalculator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import publisher.PooledPublisher;
@@ -21,14 +21,14 @@ public class VwapPriceEventHandler implements EventHandler<PriceEvent> {
     private final Map<String, AnalyticData> analyticDataMap;
     private PriceStoreFactory priceStoreFactory;
     private static final Logger logger = LoggerFactory.getLogger(VwapPriceEventHandler.class);
-    private final Calculator calculator;
+    private final ICalculator calculator;
 
     private Config config;
 
     private Publisher<IndicatorEvent> publisher;
 
     public VwapPriceEventHandler(
-            PriceStoreFactory priceStoreFactory, Calculator calculator, Config config, Publisher<IndicatorEvent> publisher) {
+            PriceStoreFactory priceStoreFactory, ICalculator calculator, Config config, Publisher<IndicatorEvent> publisher) {
         this.priceStoreFactory = priceStoreFactory;
         this.calculator = calculator;
         this.config = config;
