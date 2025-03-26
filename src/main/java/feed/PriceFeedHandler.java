@@ -13,7 +13,7 @@ import java.util.Set;
 
 public class PriceFeedHandler implements FeedHandler<String> {
     private final Set<ValidationRule<Price>> validationRules;
-    DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("h:mm a", Locale.ENGLISH);
+//    DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("h:mm a", Locale.ENGLISH);
     final StringBuilder sb = new StringBuilder();
 
     public PriceFeedHandler() {
@@ -66,7 +66,9 @@ public class PriceFeedHandler implements FeedHandler<String> {
 
     private long parseTime(String feed) {
         // Parse the time string
-        LocalTime localTime = LocalTime.parse(feed.trim(), timeFormatter);
+        // profiler show that this generate a bit garbage, improve by manually parsing it.
+//        LocalTime localTime = LocalTime.parse(feed.trim(), timeFormatter);
+        LocalTime localTime = DateTimeParser.parseTimeManually(feed.trim());
 
         // Combine with the current date
         LocalDate currentDate = LocalDate.now();
