@@ -11,7 +11,7 @@ public class IndicatorEvent extends Event<AnalyticData> implements Resettable {
     public String toString() {
         sb.setLength(0);
         //avoid double toString
-        String append = sb.append("IndicatorEvent{")
+        return sb.append("IndicatorEvent{")
                 .append("data=")
                 .append(data.getVwap()).append(",")
                 .append(data.getCurrency()).append(",")
@@ -19,7 +19,6 @@ public class IndicatorEvent extends Event<AnalyticData> implements Resettable {
                 .append(data.getTotalVol()).append(",")
                 .append(data.getTotalPriceVol()).append(",")
                 .append(")").toString();
-        return append;
     }
 
     @Override

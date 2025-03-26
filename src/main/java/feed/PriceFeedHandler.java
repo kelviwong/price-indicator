@@ -13,7 +13,7 @@ import java.util.Set;
 
 public class PriceFeedHandler implements FeedHandler<String> {
     private final Set<ValidationRule<Price>> validationRules;
-    DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("h:mm a", Locale.ENGLISH);
+//    DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("h:mm a", Locale.ENGLISH);
     final StringBuilder sb = new StringBuilder();
 
     public PriceFeedHandler() {
