@@ -11,9 +11,9 @@ public class PriceDequeStore implements IStore<Price> {
     protected static final Logger logger = LoggerFactory.getLogger(PriceDequeStore.class);
 
     ArrayDeque<Price> store;
-    public PriceDequeStore() {
+    public PriceDequeStore(String currency) {
         this.store = new ArrayDeque<>();
-        logger.info("Created PriceDequeStore");
+        logger.info("Created PriceDequeStore for {}", currency);
     }
 
     @Override

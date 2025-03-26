@@ -62,26 +62,7 @@ public class PriceService implements IService {
                     event = priceReader.poll();
                     if (event != null) {
                         Price data = event.getData();
-                        IStore<Price> priceStore = currencyPriceVolMap.computeIfAbsent(data.getCurrency(), (k) -> {
-                            try {
-                                return priceStoreFactory.createStore(k);
-                            } catch (Exception e) {
-                                logger.error("Error price store : {}", k, e);
-                                throw new RuntimeException(e);
-                            }
-                        });
-
-                        AnalyticData analyticData = analyticDataMap.computeIfAbsent(data.getCurrency(), (k) -> {
-                            AnalyticData firstData = new AnalyticData(k);
-                            firstData.setFirstDataTime(data.getTimestamp());
-                            return firstData;
-                        });
-
-                        //TODO: should make this better to avoid this creation of task.
-                        VwapTask<Price> vwapTask = new VwapTask<>(analyticData, priceStore, publisher, vwapCalculator, config);
-                        vwapTask.setData(data);
-
-                        dispatcherAgent.dispatchTask(data.getCurrency(), vwapTask);
+                        dispatcherAgent.dispatchQueue(data.getCurrency(), event);
                     }
                 } catch (Exception e) {
                     logger.error("Error processing price event: " + event, e);

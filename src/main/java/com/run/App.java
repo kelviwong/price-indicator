@@ -16,6 +16,7 @@ import feeder.CmdPriceFeeder;
 import feeder.PriceFeeder;
 import feeder.SimpleTester;
 import feeder.prompt.CommandClient;
+import indicator.VwapCalculator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import printer.SystemOutPrinter;
@@ -24,10 +25,10 @@ import queue.QueueFactory;
 import queue.QueueType;
 import service.IService;
 import service.PriceService;
+import service.PriceWorker;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
 public class App {
@@ -94,7 +95,12 @@ public class App {
 
         DispatchStrategy dispatchStrategy = config.getDispatcherConfig().getDispatchType() == DispatchType.BY_SYMBOL ? new HashSymbolDispatchStrategy() : new RoundRobinDispatchStrategy();
 
-        DispatcherAgent dispatcherAgent = new DispatcherAgent(config.getDispatcherConfig().getThreads(), dispatchStrategy);
+        DispatcherAgent dispatcherAgent = new DispatcherAgent(config.getDispatcherConfig().getThreads(), dispatchStrategy, () -> {
+            BlockingQueue<PriceEvent> taskQueue = new ArrayBlockingQueue<>(1000);
+            PriceWorker priceWorker = new PriceWorker(taskQueue, logPricePublisher, config, priceStoreFactory);
+            priceWorker.addCalculatorHandler(new VwapCalculator(config));
+            return priceWorker;
+        });
 
         PriceService priceService = new PriceService(priceReader, timeProviderFactory.get(), logPricePublisher, priceStoreFactory, dispatcherAgent, config);
         priceService.start();

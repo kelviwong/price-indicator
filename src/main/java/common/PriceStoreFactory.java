@@ -25,6 +25,6 @@ public class PriceStoreFactory {
             String path = currency.replace("/", "_") + "_" + prefix;
             return new PriceMemoryMapFileStore(path, 1024);
         }
-        return new PriceDequeStore();
+        return new PriceDequeStore(currency);
     }
 }

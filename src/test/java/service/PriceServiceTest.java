@@ -10,7 +10,9 @@ import dispatcher.DispatcherAgent;
 import dispatcher.HashSymbolDispatchStrategy;
 import dispatcher.RoundRobinDispatchStrategy;
 import enums.StoreType;
+import indicator.VwapCalculator;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import publisher.PricePublisher;
 import publisher.PriceReader;
@@ -23,7 +25,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -32,10 +36,21 @@ import static util.Data.setup59MinutesOldData;
 
 class PriceServiceTest {
     static Config config;
+    private Supplier<PriceWorker> supplier;
+    private BlockingQueue<IndicatorEvent> indicatorEventArrayBlockingQueue;
+    private BlockingQueue<PriceEvent> priceEventArrayBlockingQueue;
+    private MockPriceEventPublisher<IndicatorEvent> publisher;
 
     @BeforeAll
     public static void setup() throws IOException {
         config = Data.getConfig();
+    }
+
+    @BeforeEach
+    public void seteach() throws Exception {
+        indicatorEventArrayBlockingQueue = QueueFactory.createQueue(10000, QueueType.BACKOFF);
+        priceEventArrayBlockingQueue = QueueFactory.createQueue(10000, QueueType.BACKOFF);
+        publisher = new MockPriceEventPublisher<>(indicatorEventArrayBlockingQueue);
     }
 
     @Test
@@ -53,14 +68,18 @@ class PriceServiceTest {
         timeProvider.setCurrentTime("10:00:00");
         assertEquals("10:00:00", timeProvider.getCurrentTime());
 
-        BlockingQueue<IndicatorEvent> indicatorEventArrayBlockingQueue = QueueFactory.createQueue(10000, QueueType.BACKOFF);
-        BlockingQueue<PriceEvent> priceEventArrayBlockingQueue = QueueFactory.createQueue(10000, QueueType.BACKOFF);
-        MockPriceEventPublisher<IndicatorEvent> publisher = new MockPriceEventPublisher<>(indicatorEventArrayBlockingQueue);
-
         PricePublisher<PriceEvent> ignessPublisher = new PricePublisher<>(priceEventArrayBlockingQueue);
         PriceReader<PriceEvent> priceReader = new PriceReader<>(priceEventArrayBlockingQueue);
         PriceStoreFactory priceStoreFactory = new PriceStoreFactory(storeType, "test2");
-        DispatcherAgent dispatcherAgent = new DispatcherAgent(config.getDispatcherConfig().getThreads(), new HashSymbolDispatchStrategy());
+
+        supplier = () -> {
+            BlockingQueue<PriceEvent> taskQueue = new ArrayBlockingQueue<>(1000);
+            PriceWorker priceWorker = new PriceWorker(taskQueue, publisher, config, priceStoreFactory);
+            priceWorker.addCalculatorHandler(new VwapCalculator(config));
+            return priceWorker;
+        };
+
+        DispatcherAgent dispatcherAgent = new DispatcherAgent(config.getDispatcherConfig().getThreads(), new HashSymbolDispatchStrategy(), supplier);
         PriceService priceService = new PriceService(priceReader, timeProvider, publisher, priceStoreFactory, dispatcherAgent, config);
         priceService.start();
         String currency = "AUD/USD";
@@ -122,8 +141,15 @@ class PriceServiceTest {
         PriceReader<PriceEvent> priceReader = new PriceReader<>(priceEventArrayBlockingQueue);
         PriceStoreFactory priceStoreFactory = new PriceStoreFactory(StoreType.DEQUE, "test2");
 
+        supplier = () -> {
+            BlockingQueue<PriceEvent> taskQueue = new ArrayBlockingQueue<>(1000);
+            PriceWorker priceWorker = new PriceWorker(taskQueue, publisher, config, priceStoreFactory);
+            priceWorker.addCalculatorHandler(new VwapCalculator(config));
+            return priceWorker;
+        };
+
         // use 3 threads
-        DispatcherAgent dispatcherAgent = new DispatcherAgent(3, new RoundRobinDispatchStrategy());
+        DispatcherAgent dispatcherAgent = new DispatcherAgent(3, new RoundRobinDispatchStrategy(), supplier);
         PriceService priceService = new PriceService(priceReader, timeProvider, publisher, priceStoreFactory, dispatcherAgent, config);
         priceService.start();
 

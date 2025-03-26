@@ -1,57 +1,124 @@
 package dispatcher;
 
+import common.PriceStoreFactory;
+import config.Config;
+import data.Price;
+import data.PriceEvent;
+import indicator.VwapCalculator;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import publisher.PricePublisher;
+import service.PriceWorker;
 
+import java.util.Queue;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
+import java.util.function.Supplier;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class DispatcherAgentTest {
+    @Mock
+    PricePublisher publisher;
+
+    @Mock
+    Config config;
+
+    @Mock
+    PriceStoreFactory priceStoreFactory;
+    private Supplier<PriceWorker> supplier;
+
+    @BeforeEach
+    public void setUp() {
+        supplier = () -> {
+            BlockingQueue<PriceEvent> taskQueue = new ArrayBlockingQueue<>(1000);
+            PriceWorker priceWorker = new PriceWorker(taskQueue, publisher, config, priceStoreFactory);
+//            priceWorker.addCalculatorHandler(new VwapCalculator(config));
+            return priceWorker;
+        };
+
+
+    }
 
     @Test
     public void testDispatcherAgentShouldAlwaysUseSameThreadWithSameCode() {
-        DispatcherAgent dispatcherAgent = new DispatcherAgent(5, new HashSymbolDispatchStrategy());
+        DispatcherAgent dispatcherAgent = new DispatcherAgent(5, new HashSymbolDispatchStrategy(), supplier);
         dispatcherAgent.start();
         String symbolA = "AUD/USD";
         String symbolB = "EUR/USD";
         String symbolC = "JPY/USD";
-        ExecutorService executorServiceA = dispatcherAgent.dispatchTask(symbolA, () -> {});
-        ExecutorService executorServiceB = dispatcherAgent.dispatchTask(symbolB, () -> {});
-        ExecutorService executorServiceC =  dispatcherAgent.dispatchTask(symbolC, () -> {});
+        ExecutorService executorServiceA = dispatcherAgent.dispatchTask(symbolA, () -> {
+        });
+        ExecutorService executorServiceB = dispatcherAgent.dispatchTask(symbolB, () -> {
+        });
+        ExecutorService executorServiceC = dispatcherAgent.dispatchTask(symbolC, () -> {
+        });
 
-        ExecutorService executorService = dispatcherAgent.dispatchTask(symbolB, () -> {});
+        ExecutorService executorService = dispatcherAgent.dispatchTask(symbolB, () -> {
+        });
         assertEquals(executorServiceB, executorService);
-        executorService = dispatcherAgent.dispatchTask(symbolA, () -> {});
+        executorService = dispatcherAgent.dispatchTask(symbolA, () -> {
+        });
         assertEquals(executorServiceA, executorService);
-        executorService = dispatcherAgent.dispatchTask(symbolC, () -> {});
+        executorService = dispatcherAgent.dispatchTask(symbolC, () -> {
+        });
         assertEquals(executorServiceC, executorService);
-
-        executorServiceA.shutdownNow();
-        executorServiceB.shutdownNow();
-        executorServiceC.shutdownNow();
         dispatcherAgent.stop();
     }
 
     @Test
+    public void testDispatcherAgentShouldAlwaysUseSameThreadWithSameCodeWorker() {
+        DispatcherAgent dispatcherAgent = new DispatcherAgent(5, new HashSymbolDispatchStrategy(), supplier);
+        dispatcherAgent.start();
+        String symbolA = "AUD/USD";
+        String symbolB = "EUR/USD";
+        String symbolC = "JPY/USD";
+        PriceEvent event = new PriceEvent(new Price());
+        PriceWorker workerA = dispatcherAgent.dispatchQueue(symbolA, event);
+        PriceWorker workerB = dispatcherAgent.dispatchQueue(symbolB, event);
+        PriceWorker workerC = dispatcherAgent.dispatchQueue(symbolC, event);
+
+        PriceWorker worker = dispatcherAgent.dispatchQueue(symbolB, event);
+        assertEquals(workerB, worker);
+        worker = dispatcherAgent.dispatchQueue(symbolA, event);
+        assertEquals(workerA, worker);
+        worker = dispatcherAgent.dispatchQueue(symbolC, event);
+        assertEquals(workerC, worker);
+
+        dispatcherAgent.stop();
+    }
+
+
+    @Test
     public void testDispatcherShouldRoundRobinTheThread() {
-        DispatcherAgent dispatcherAgent = new DispatcherAgent(5, new RoundRobinDispatchStrategy());
+        DispatcherAgent dispatcherAgent = new DispatcherAgent(5, new RoundRobinDispatchStrategy(), supplier);
         dispatcherAgent.start();
         String symbolA = "AUD/USD";
         String symbolB = "EUR/USD";
         String symbolC = "JPY/USD";
         ExecutorService[] executors = dispatcherAgent.getExecutors();
 
-        ExecutorService executorServiceA = dispatcherAgent.dispatchTask(symbolA, () -> {});
-        ExecutorService executorServiceB = dispatcherAgent.dispatchTask(symbolB, () -> {});
-        ExecutorService executorServiceC =  dispatcherAgent.dispatchTask(symbolC, () -> {});
+        ExecutorService executorServiceA = dispatcherAgent.dispatchTask(symbolA, () -> {
+        });
+        ExecutorService executorServiceB = dispatcherAgent.dispatchTask(symbolB, () -> {
+        });
+        ExecutorService executorServiceC = dispatcherAgent.dispatchTask(symbolC, () -> {
+        });
 
         //expect to be putting in-order executors
         assertEquals(executors[0], executorServiceA);
         assertEquals(executors[1], executorServiceB);
         assertEquals(executors[2], executorServiceC);
 
-        ExecutorService executorServiceB2 = dispatcherAgent.dispatchTask(symbolB, () -> {});
-        ExecutorService executorServiceC2 =  dispatcherAgent.dispatchTask(symbolC, () -> {});
-        ExecutorService executorServiceA2 = dispatcherAgent.dispatchTask(symbolA, () -> {});
+        ExecutorService executorServiceB2 = dispatcherAgent.dispatchTask(symbolB, () -> {
+        });
+        ExecutorService executorServiceC2 = dispatcherAgent.dispatchTask(symbolC, () -> {
+        });
+        ExecutorService executorServiceA2 = dispatcherAgent.dispatchTask(symbolA, () -> {
+        });
 
         // should stick to same thread once set
         assertEquals(executors[0], executorServiceA2);
@@ -67,16 +134,19 @@ class DispatcherAgentTest {
     @Test
     public void testDispatcherShouldBySymbolThread() {
         HashSymbolDispatchStrategy dispatchStrategy = new HashSymbolDispatchStrategy();
-        DispatcherAgent dispatcherAgent = new DispatcherAgent(5, dispatchStrategy);
+        DispatcherAgent dispatcherAgent = new DispatcherAgent(5, dispatchStrategy, supplier);
         dispatcherAgent.start();
         String symbolA = "AUD/USD";
         String symbolB = "EUR/USD";
         String symbolC = "JPY/USD";
         ExecutorService[] executors = dispatcherAgent.getExecutors();
 
-        ExecutorService executorServiceC =  dispatcherAgent.dispatchTask(symbolC, () -> {});
-        ExecutorService executorServiceA = dispatcherAgent.dispatchTask(symbolA, () -> {});
-        ExecutorService executorServiceB = dispatcherAgent.dispatchTask(symbolB, () -> {});
+        ExecutorService executorServiceC = dispatcherAgent.dispatchTask(symbolC, () -> {
+        });
+        ExecutorService executorServiceA = dispatcherAgent.dispatchTask(symbolA, () -> {
+        });
+        ExecutorService executorServiceB = dispatcherAgent.dispatchTask(symbolB, () -> {
+        });
 
         int threadNo = dispatchStrategy.getThreadId(symbolA, 5);
         int threadNo2 = dispatchStrategy.getThreadId(symbolB, 5);
@@ -87,9 +157,12 @@ class DispatcherAgentTest {
         assertEquals(executors[threadNo2], executorServiceB);
         assertEquals(executors[threadNo3], executorServiceC);
 
-        ExecutorService executorServiceA2 = dispatcherAgent.dispatchTask(symbolA, () -> {});
-        ExecutorService executorServiceB2 = dispatcherAgent.dispatchTask(symbolB, () -> {});
-        ExecutorService executorServiceC2 =  dispatcherAgent.dispatchTask(symbolC, () -> {});
+        ExecutorService executorServiceA2 = dispatcherAgent.dispatchTask(symbolA, () -> {
+        });
+        ExecutorService executorServiceB2 = dispatcherAgent.dispatchTask(symbolB, () -> {
+        });
+        ExecutorService executorServiceC2 = dispatcherAgent.dispatchTask(symbolC, () -> {
+        });
 
         assertEquals(executors[threadNo], executorServiceA2);
         assertEquals(executors[threadNo2], executorServiceB2);

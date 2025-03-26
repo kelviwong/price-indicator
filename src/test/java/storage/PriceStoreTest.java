@@ -30,7 +30,7 @@ class PriceStoreTest {
         MockTimeProvider mockTimeProvider = new MockTimeProvider();
         List<Price> priceList = new ArrayList<>();
         setupData(priceList, "AUD/USD", mockTimeProvider);
-        PriceDequeStore store = new PriceDequeStore();
+        PriceDequeStore store = new PriceDequeStore("AUD/USD");
         store.writeAll(priceList);
         assertEquals(5, store.size());
         Price data = new Price();
