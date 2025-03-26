@@ -66,7 +66,9 @@ public class PriceFeedHandler implements FeedHandler<String> {
 
     private long parseTime(String feed) {
         // Parse the time string
-        LocalTime localTime = LocalTime.parse(feed.trim(), timeFormatter);
+        // profiler show that this generate a bit garbage, improve by manually parsing it.
+//        LocalTime localTime = LocalTime.parse(feed.trim(), timeFormatter);
+        LocalTime localTime = DateTimeParser.parseTimeManually(feed.trim());
 
         // Combine with the current date
         LocalDate currentDate = LocalDate.now();
