@@ -25,6 +25,7 @@ public class IndicatorEvent extends Event<AnalyticData> implements Resettable {
 
     @Override
     public void reset() {
-        data.clear();
+        startNs = 0;
+        data = null;
     }
 }

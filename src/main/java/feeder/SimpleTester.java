@@ -61,7 +61,7 @@ public class SimpleTester {
 
     public void start() {
         long time = setCurrentTime("01:00:00");
-        int numberOfLine = 30000;
+        int numberOfLine = 20000;
         ArrayList<String> strings = generateString(numberOfLine, time);
         AtomicInteger counter = new AtomicInteger(0);
         CountDownLatch latch = new CountDownLatch(numberOfLine);
@@ -78,7 +78,7 @@ public class SimpleTester {
                 System.out.println("No data found");
                 throw new RuntimeException("This is the end.");
             }
-        }, 0, 200, TimeUnit.MICROSECONDS);
+        }, 0, 1, TimeUnit.MILLISECONDS);
 
         try {
             latch.await();

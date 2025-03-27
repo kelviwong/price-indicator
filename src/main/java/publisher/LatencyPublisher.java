@@ -19,7 +19,7 @@ public class LatencyPublisher<T extends Event<T>> implements Publisher<T> {
     @Override
     public void publish(T data) {
         this.innerPublisher.publish(data);
-        latencyTracker.latencyMicro(data.getStartNs());
-//        logger.info("latency: {} Micro", latencyTracker.latencyMicro(data.getStartNs()));
+        long latency = latencyTracker.latencyMicro(data.getStartNs());
+//        logger.info("latency: {} Micro", latency);
     }
 }
