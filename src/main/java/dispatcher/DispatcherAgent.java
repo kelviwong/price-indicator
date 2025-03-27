@@ -55,7 +55,7 @@ public class DispatcherAgent<T> implements IService {
         return executorService;
     }
 
-    public EventWorker dispatchQueue(String symbol, T event) {
+    public EventWorker dispatchQueue(WritableMutableCharSequence symbol, T event) {
         int threadNo = symbolMappedThread.getValue(symbol);
         if (threadNo == symbolMappedThread.missingValue()) {
             threadNo = dispatchStrategy.getThreadId(symbol, numOfThread);

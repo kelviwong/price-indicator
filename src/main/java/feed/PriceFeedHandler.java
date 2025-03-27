@@ -2,28 +2,23 @@ package feed;
 
 import data.Price;
 import data.WritableMutableCharSequence;
-import lombok.Locked;
-import util.DateTimeParser;
 import vaildation.PriceValidationRule;
 import vaildation.ValidationRule;
 import vaildation.VolumeValidationRule;
 
-import java.time.*;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
+import static util.DateTimeParser.parseTime;
 import static util.FeedUtil.parseDouble;
 import static util.FeedUtil.parseLongWithCommas;
 
 public class PriceFeedHandler implements FeedHandler<String> {
-    private final Set<ValidationRule<Price>> validationRules;
+    private final List<ValidationRule<Price>> validationRules;
     //    DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("h:mm a", Locale.ENGLISH);
     final StringBuilder sb = new StringBuilder();
 
     public PriceFeedHandler() {
-        validationRules = new HashSet<>();
+        validationRules = new ArrayList<>();
         validationRules.add(new PriceValidationRule());
         validationRules.add(new VolumeValidationRule());
     }
@@ -54,28 +49,15 @@ public class PriceFeedHandler implements FeedHandler<String> {
             hashedSymbol.put(symbol, symbol);
         }
         Price ultimatePrice = new Price(symbol, time, price, volume);
-        for (ValidationRule<Price> rule : validationRules) {
-            String check = rule.check(ultimatePrice);
+
+        int size = validationRules.size();
+        for (int i = 0; i < size; i++) {
+            String check = validationRules.get(i).check(ultimatePrice);
             if (!check.isEmpty()) {
                 throw new Exception(check);
             }
         }
+
         return ultimatePrice;
-    }
-
-    LocalDate currentDate = LocalDate.now();
-
-    private long parseTime(String feed) {
-        // Parse the time string
-        // profiler show that this generate a bit garbage, improve by manually parsing it.
-        LocalTime localTime = DateTimeParser.parseTimeManually(feed.trim());
-
-        // Combine with the current date
-        LocalDateTime dateTime = LocalDateTime.of(currentDate, localTime);
-
-        // Convert to milliseconds since epoch
-        ZoneOffset offset = ZoneOffset.UTC;
-        long epochMillis = dateTime.toEpochSecond(offset) * 1000 + dateTime.getNano() / 1_000_000;
-        return epochMillis;
     }
 }

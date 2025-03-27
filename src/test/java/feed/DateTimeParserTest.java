@@ -29,4 +29,24 @@ class DateTimeParserTest {
         assertEquals(0, localTime.getMinute());
     }
 
+    @Test
+    public void testDateTimeToMills(){
+        long time = DateTimeParser.parseOrgiTime("12:00 AM");
+        long time2 = DateTimeParser.parseTime("12:00 AM");
+        assertEquals(time, time2);
+
+        time = DateTimeParser.parseOrgiTime("12:00 PM");
+        time2 = DateTimeParser.parseTime("12:00 PM");
+        assertEquals(time, time2);
+
+        time = DateTimeParser.parseOrgiTime("01:00 AM");
+        time2 = DateTimeParser.parseTime("01:00 AM");
+        assertEquals(time, time2);
+
+        time = DateTimeParser.parseOrgiTime("06:00 PM");
+        time2 = DateTimeParser.parseTime("06:00 PM");
+        assertEquals(time, time2);
+
+    }
+
 }

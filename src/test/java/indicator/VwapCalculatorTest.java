@@ -53,7 +53,6 @@ class VwapCalculatorTest {
     @Test
     public void testVwapPriceWhenVolIsZero() {
         MockTimeProvider mockTimeProvider = new MockTimeProvider();
-        Calculator calculator = new VwapCalculator(config);
         WritableMutableCharSequence writableMutableCharSequence = new WritableMutableCharSequence(20);
         writableMutableCharSequence.copy("AUD/USD");
         PriceDequeStore deque = new PriceDequeStore(writableMutableCharSequence);
