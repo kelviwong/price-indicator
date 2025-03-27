@@ -8,6 +8,6 @@ public class LogPublisher<T> implements Publisher<T> {
 
     @Override
     public void publish(T data) {
-        logger.info("Data: {}", data);
+//        logger.info("Data: {}", data);
     }
 }

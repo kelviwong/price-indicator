@@ -28,7 +28,7 @@ public class VwapTask<T extends Price> extends Task<T> {
 
     @Override
     public void run() {
-        logger.info("processing data: {}", data);
+//        logger.info("processing data: {}", data);
         //TODO: should try to elimiated this object creation.
         IndicatorEvent indicatorEvent = new IndicatorEvent(analyticData);
         calculator.calculateWithDelta(data, priceStore, analyticData);
