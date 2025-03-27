@@ -3,7 +3,6 @@ package data;
 import lombok.Data;
 
 import java.nio.MappedByteBuffer;
-import java.util.Objects;
 
 @Data
 public class Price implements MemoryFileAware<Price> {

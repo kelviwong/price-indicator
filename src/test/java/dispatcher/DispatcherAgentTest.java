@@ -20,14 +20,6 @@ import java.util.function.Supplier;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class DispatcherAgentTest {
-    @Mock
-    PricePublisher publisher;
-
-    @Mock
-    Config config;
-
-    @Mock
-    PriceStoreFactory priceStoreFactory;
     private Supplier<EventWorker> supplier;
 
     @BeforeEach
@@ -35,7 +27,6 @@ class DispatcherAgentTest {
         supplier = () -> {
             BlockingQueue<PriceEvent> taskQueue = new ArrayBlockingQueue<>(1000);
             EventWorker priceWorker = new EventWorker(taskQueue);
-//            priceWorker.addCalculatorHandler(new VwapCalculator(config));
             return priceWorker;
         };
 

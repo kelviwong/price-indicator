@@ -25,9 +25,7 @@ public class WritableMutableCharSequence {
 
         buffer.byteBuffer().clear();
         clear();
-//        int length = buffer.putStringWithoutLengthAscii(0, src.buffer);
         buffer.putBytes(0, src.buffer, 0, src.length());
-//        int position = buffer.byteBuffer().position();
         offset += src.length();
         endIndex = offset;
         size = src.size;
@@ -39,7 +37,6 @@ public class WritableMutableCharSequence {
         buffer.byteBuffer().clear();
         clear();
         int length = buffer.putStringWithoutLengthAscii(0, src);
-//        int position = buffer.byteBuffer().position();
         offset += src.length();
         endIndex = trimEndIndex(0, length);
         return this;
@@ -59,18 +56,12 @@ public class WritableMutableCharSequence {
     }
 
     public WritableMutableCharSequence concat(String src) {
-//        buffer.byteBuffer().clear();
-        int length = buffer.putStringWithoutLengthAscii(offset, src);
-//        int position = buffer.byteBuffer().position();
         offset += src.length();
         endIndex = offset;
         return this;
     }
 
     public WritableMutableCharSequence concat(int src) {
-//        buffer.byteBuffer().clear();
-        int length = buffer.putIntAscii(offset, src);
-//        int position = buffer.byteBuffer().position();
         offset += Integer.BYTES;
         endIndex = offset;
         return this;
