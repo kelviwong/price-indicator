@@ -2,7 +2,10 @@ package storage;
 
 import common.MockTimeProvider;
 import data.Price;
+import data.WritableMutableCharSequence;
+import lombok.Locked;
 import org.junit.jupiter.api.Test;
+import util.Data;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,9 +64,9 @@ class PriceStoreTest {
     public void testMemoryMapStore() throws Exception {
         MockTimeProvider mockTimeProvider = new MockTimeProvider();
         List<Price> priceList = new ArrayList<>();
-        String currency = "AUD/USD";
-        setupData(priceList, currency, mockTimeProvider);
-        String path = createPath(currency);
+        WritableMutableCharSequence currency = Data.getOffheapChar("AUD/USD");
+        setupData(priceList, currency.toString(), mockTimeProvider);
+        String path = createPath(currency.toString());
         PriceMemoryMapFileStore memoryMapFileStore = createMMFFileStore(path);
         Price newPrice = new Price(currency, mockTimeProvider.now(), 22200.5, 2000);
         Price temp = new Price();

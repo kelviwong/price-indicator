@@ -1,6 +1,7 @@
 package common;
 
 import data.Price;
+import data.WritableMutableCharSequence;
 import dispatcher.DispatcherAgent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,9 +21,10 @@ public class PriceStoreFactory {
         logger.info("PriceStoreFactory for " + type + " " + prefix);
     }
 
-    public IStore<Price> createStore(String currency) throws Exception {
+    public IStore<Price> createStore(WritableMutableCharSequence currency) throws Exception {
         if (type == StoreType.MEM_MAP) {
-            String path = currency.replace("/", "_") + "_" + prefix;
+            // very limit usage , so toString is also fine
+            String path = currency.toString().replace("/", "_") + "_" + prefix;
             return new PriceMemoryMapFileStore(path, 1024);
         }
         return new PriceDequeStore(currency);
