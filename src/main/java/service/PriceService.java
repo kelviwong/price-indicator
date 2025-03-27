@@ -1,19 +1,16 @@
 package service;
 
-import util.ServiceUtil;
 import common.NamedThreadFactory;
-import common.TimeProvider;
-import config.Config;
-import data.*;
+import data.Event;
+import data.Price;
+import data.WritableMutableCharSequence;
 import dispatcher.DispatcherAgent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import publisher.PriceReader;
-import publisher.Publisher;
 import storage.IStore;
-import common.PriceStoreFactory;
+import util.ServiceUtil;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;

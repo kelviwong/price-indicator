@@ -17,7 +17,7 @@ public class PooledPublisher<T extends Event<?> & Resettable> implements Publish
 
     public PooledPublisher(Publisher<T> innerPublisher, Supplier<T> supplier) {
         this.innerPublisher = innerPublisher;
-        pool = new ObjectPool<T>(100, supplier);
+        pool = new ObjectPool<T>(10000, supplier);
         logger.info("Started Pooled Publisher");
     }
 
