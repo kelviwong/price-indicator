@@ -1,6 +1,9 @@
 package util;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneOffset;
 
 public class DateTimeParser {
     public static LocalTime parseTimeManually(String input) {
@@ -20,5 +23,32 @@ public class DateTimeParser {
         }
 
         return LocalTime.of(hour, minute);
+    }
+
+    static LocalDate currentDate = LocalDate.now();
+    static long dateEpochSecond = currentDate.atStartOfDay(ZoneOffset.UTC).toEpochSecond();
+
+    public static  long parseTime(String feed) {
+        LocalTime localTime = DateTimeParser.parseTimeManually(feed.trim());
+        long seconds = localTime.toSecondOfDay();
+        long epochMillis = (dateEpochSecond + seconds) * 1000L + localTime.getNano() / 1_000_000;
+        return epochMillis;
+    }
+
+    /*
+    dont use it in prod, for checking only in test case
+     */
+    public static long parseOrgiTime(String feed) {
+        // Parse the time string
+        // profiler show that this generate a bit garbage, improve by manually parsing it.
+        LocalTime localTime = DateTimeParser.parseTimeManually(feed.trim());
+
+        // Combine with the current date
+        LocalDateTime dateTime = LocalDateTime.of(currentDate, localTime);
+
+        // Convert to milliseconds since epoch
+        ZoneOffset offset = ZoneOffset.UTC;
+        long epochMillis = dateTime.toEpochSecond(offset) * 1000 + dateTime.getNano() / 1_000_000;
+        return epochMillis;
     }
 }
