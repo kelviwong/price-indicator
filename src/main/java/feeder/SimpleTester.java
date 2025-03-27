@@ -78,7 +78,7 @@ public class SimpleTester {
                 System.out.println("No data found");
                 throw new RuntimeException("This is the end.");
             }
-        }, 0, 1, TimeUnit.MILLISECONDS);
+        }, 0, 200, TimeUnit.MICROSECONDS);
 
         try {
             latch.await();

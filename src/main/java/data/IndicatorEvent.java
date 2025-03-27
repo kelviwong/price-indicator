@@ -19,7 +19,7 @@ public class IndicatorEvent extends Event<AnalyticData> implements Resettable {
                 .append(data.getCurrency()).append(",")
                 .append(data.getFirstDataTime()).append(",")
                 .append(data.getTotalVol()).append(",")
-                .append(data.getTotalPriceVol()).append(",")
+                .append(data.getTotalPriceVol())
                 .append(")").toString();
     }
 

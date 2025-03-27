@@ -102,7 +102,7 @@ public class App {
         DispatchStrategy dispatchStrategy = config.getDispatcherConfig().getDispatchType() == DispatchType.BY_SYMBOL ? new HashSymbolDispatchStrategy() : new RoundRobinDispatchStrategy();
 
         Publisher<IndicatorEvent> finalPricePublisher = pricePublisher;
-        DispatcherAgent dispatcherAgent = new DispatcherAgent(config.getDispatcherConfig().getThreads(), dispatchStrategy, () -> {
+        DispatcherAgent<PriceEvent> dispatcherAgent = new DispatcherAgent<>(config.getDispatcherConfig().getThreads(), dispatchStrategy, () -> {
             BlockingQueue<PriceEvent> taskQueue = new ArrayBlockingQueue<>(1000);
             EventWorker<PriceEvent> priceWorker = new EventWorker<>(taskQueue);
             priceWorker.registerHandler(new VwapPriceEventHandler(priceStoreFactory, new VwapCalculator(config), config, finalPricePublisher));
@@ -115,10 +115,10 @@ public class App {
     }
 
     private static Publisher<IndicatorEvent> getPublisher(boolean testMode) {
-        Publisher<IndicatorEvent> pricePublisher = new PooledPublisher(new LogPublisher<>(), () -> new IndicatorEvent(null));
+        Publisher<IndicatorEvent> pricePublisher = new LogPublisher();
         if (testMode) {
             latencyTracker = new LatencyTracker(timeProvider);
-            pricePublisher = new LatencyPublisher<>(new PooledPublisher(new LogPublisher<>(), () -> new IndicatorEvent(null)), latencyTracker);
+            pricePublisher = new LatencyPublisher(new LogPublisher<>(), latencyTracker);
         }
         return pricePublisher;
     }
