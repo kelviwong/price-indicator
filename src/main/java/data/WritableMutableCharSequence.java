@@ -29,8 +29,6 @@ public class WritableMutableCharSequence {
         offset += src.length();
         endIndex = offset;
         size = src.size;
-
-        String string = toString();
     }
 
     public WritableMutableCharSequence copy(String src) {
@@ -56,12 +54,14 @@ public class WritableMutableCharSequence {
     }
 
     public WritableMutableCharSequence concat(String src) {
+        buffer.putStringWithoutLengthAscii(offset, src);
         offset += src.length();
         endIndex = offset;
         return this;
     }
 
     public WritableMutableCharSequence concat(int src) {
+        buffer.putIntAscii(offset, src);
         offset += Integer.BYTES;
         endIndex = offset;
         return this;

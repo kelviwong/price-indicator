@@ -1,15 +1,11 @@
 package dispatcher;
 
-import data.WritableMutableCharSequence;
-import org.junit.jupiter.api.BeforeAll;
-import common.PriceStoreFactory;
-import config.Config;
 import data.Price;
 import data.PriceEvent;
+import data.WritableMutableCharSequence;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import publisher.PricePublisher;
 import service.EventWorker;
 
 import java.util.concurrent.ArrayBlockingQueue;

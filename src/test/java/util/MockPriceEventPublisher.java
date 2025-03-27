@@ -5,7 +5,6 @@ import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import publisher.PricePublisher;
-import queue.LogDropConsumer;
 
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
@@ -22,23 +21,23 @@ public class MockPriceEventPublisher<T extends IndicatorEvent> extends PricePubl
     }
 
     @Override
-    public void publish(T data) {
+    public synchronized void publish(T data) {
         lastEvent = data;
         lastEvents.put(data.getData().getCurrency().toString(), data);
         logger.info("Publishing: {}", data);
         super.publish(data);
     }
 
-    public void clearLastEvent() {
+    public synchronized void clearLastEvent() {
         lastEvent = null;
         lastEvents.clear();
     }
 
-    public Map<String, T> getResult() {
+    public synchronized Map<String, T> getResult() {
         return lastEvents;
     }
 
-    public T getLastEvent() {
+    public synchronized T getLastEvent() {
         return lastEvent;
     }
 }

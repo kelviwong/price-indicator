@@ -33,8 +33,6 @@ public class PriceFeedHandler implements FeedHandler<String> {
         // 9:30 AM AUD/USD 0.6905 106,198
         int space1 = feed.indexOf(' ');
         int space2 = feed.indexOf(' ', space1 + 1);
-//        String timeStr = feed.substring(0, space2);
-//        long time = parseTime(timeStr);
         long time = parseTime(feed);
 
         int space3 = feed.indexOf(' ', space2 + 1);

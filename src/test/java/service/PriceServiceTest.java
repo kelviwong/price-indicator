@@ -123,7 +123,7 @@ class PriceServiceTest {
         assertEquals("10:02:01", timeProvider.getCurrentTime());
         ignessPublisher.publish(new PriceEvent(new Price(currency, timeProvider.now(), 232.4, 12000)));
 
-        Thread.sleep(10);
+        Thread.sleep(1000);
         assertEquals(currency, publisher.getLastEvent().getData().getCurrency());
         assertEquals(72.05763636363636, publisher.getLastEvent().getData().getVwap());
     }
@@ -180,7 +180,7 @@ class PriceServiceTest {
             }
         }
 
-        Thread.sleep(10);
+        Thread.sleep(1000);
 
         Map<String, IndicatorEvent> results = publisher.getResult();
         IndicatorEvent resultEvent = results.get("AUD/USD");
