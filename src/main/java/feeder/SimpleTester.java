@@ -1,9 +1,12 @@
 package feeder;
 
+import latency.LatencyTracker;
+
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -13,9 +16,12 @@ public class SimpleTester {
     private final ScheduledExecutorService executor;
     AbstractQueueFeeder<String> feeder;
 
-    public SimpleTester(AbstractQueueFeeder<String> feeder) {
+    LatencyTracker latencyTracker;
+
+    public SimpleTester(AbstractQueueFeeder<String> feeder, LatencyTracker latencyTracker) {
         this.feeder = feeder;
         executor = Executors.newSingleThreadScheduledExecutor();
+        this.latencyTracker = latencyTracker;
     }
 
     StringBuilder sb = new StringBuilder();
@@ -55,8 +61,10 @@ public class SimpleTester {
 
     public void start() {
         long time = setCurrentTime("01:00:00");
-        ArrayList<String> strings = generateString(30000, time);
+        int numberOfLine = 30000;
+        ArrayList<String> strings = generateString(numberOfLine, time);
         AtomicInteger counter = new AtomicInteger(0);
+        CountDownLatch latch = new CountDownLatch(numberOfLine);
         executor.scheduleAtFixedRate(() -> {
             try {
                 String data = strings.get(counter.getAndIncrement());
@@ -65,10 +73,21 @@ public class SimpleTester {
                     throw new RuntimeException("This is the end.");
                 }
                 feeder.pushData(data);
+                latch.countDown();
             } catch (Exception e) {
                 System.out.println("No data found");
                 throw new RuntimeException("This is the end.");
             }
         }, 0, 1, TimeUnit.MILLISECONDS);
+
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+        latencyTracker.showStats();
+
+        executor.shutdownNow();
     }
 }

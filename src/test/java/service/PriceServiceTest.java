@@ -3,10 +3,7 @@ package service;
 import common.MockTimeProvider;
 import common.PriceStoreFactory;
 import config.Config;
-import data.IndicatorEvent;
-import data.Price;
-import data.PriceEvent;
-import data.WritableMutableCharSequence;
+import data.*;
 import dispatcher.DispatcherAgent;
 import dispatcher.HashSymbolDispatchStrategy;
 import dispatcher.RoundRobinDispatchStrategy;
@@ -39,7 +36,7 @@ class PriceServiceTest {
     static Config config;
     private Supplier<EventWorker> supplier;
     private BlockingQueue<IndicatorEvent> indicatorEventArrayBlockingQueue;
-    private BlockingQueue<PriceEvent> priceEventArrayBlockingQueue;
+    private BlockingQueue<Event<Price>> priceEventArrayBlockingQueue;
     private MockPriceEventPublisher<IndicatorEvent> publisher;
 
     @BeforeAll
@@ -69,8 +66,8 @@ class PriceServiceTest {
         timeProvider.setCurrentTime("10:00:00");
         assertEquals("10:00:00", timeProvider.getCurrentTime());
 
-        PricePublisher<PriceEvent> ignessPublisher = new PricePublisher<>(priceEventArrayBlockingQueue);
-        PriceReader<PriceEvent> priceReader = new PriceReader<>(priceEventArrayBlockingQueue);
+        PricePublisher<Event<Price>> ignessPublisher = new PricePublisher<>(priceEventArrayBlockingQueue);
+        PriceReader<Event<Price>> priceReader = new PriceReader<>(priceEventArrayBlockingQueue);
         PriceStoreFactory priceStoreFactory = new PriceStoreFactory(storeType, "test2");
 
         supplier = () -> {
@@ -81,7 +78,7 @@ class PriceServiceTest {
         };
 
         DispatcherAgent dispatcherAgent = new DispatcherAgent(config.getDispatcherConfig().getThreads(), new HashSymbolDispatchStrategy(), supplier);
-        PriceService priceService = new PriceService(priceReader, timeProvider, publisher, priceStoreFactory, dispatcherAgent, config);
+        PriceService priceService = new PriceService(priceReader,dispatcherAgent);
         priceService.start();
         WritableMutableCharSequence currency = Data.getOffheapChar("AUD/USD");
 
@@ -135,11 +132,11 @@ class PriceServiceTest {
         assertEquals("10:00:00", timeProvider.getCurrentTime());
 
         BlockingQueue<IndicatorEvent> indicatorEventArrayBlockingQueue = QueueFactory.createQueue(10000, QueueType.BACKOFF);
-        BlockingQueue<PriceEvent> priceEventArrayBlockingQueue = QueueFactory.createQueue(10000, QueueType.BACKOFF);
+        BlockingQueue<Event<Price>> priceEventArrayBlockingQueue = QueueFactory.createQueue(10000, QueueType.BACKOFF);
         MockPriceEventPublisher<IndicatorEvent> publisher = new MockPriceEventPublisher<>(indicatorEventArrayBlockingQueue);
 
-        PricePublisher<PriceEvent> ignessPublisher = new PricePublisher<>(priceEventArrayBlockingQueue);
-        PriceReader<PriceEvent> priceReader = new PriceReader<>(priceEventArrayBlockingQueue);
+        PricePublisher<Event<Price>> ignessPublisher = new PricePublisher<>(priceEventArrayBlockingQueue);
+        PriceReader<Event<Price>> priceReader = new PriceReader<>(priceEventArrayBlockingQueue);
         PriceStoreFactory priceStoreFactory = new PriceStoreFactory(StoreType.DEQUE, "test2");
 
         supplier = () -> {
@@ -151,7 +148,7 @@ class PriceServiceTest {
 
         // use 3 threads
         DispatcherAgent dispatcherAgent = new DispatcherAgent(3, new RoundRobinDispatchStrategy(), supplier);
-        PriceService priceService = new PriceService(priceReader, timeProvider, publisher, priceStoreFactory, dispatcherAgent, config);
+        PriceService priceService = new PriceService(priceReader, dispatcherAgent);
         priceService.start();
 
         // put in a price from very old first to ensure we will start to publish vwap price immediately.
@@ -195,7 +192,7 @@ class PriceServiceTest {
         assertEquals(11.929411764705883, resultEvent.getData().getVwap());
     }
 
-    private static void setupOldData(String currency, PricePublisher<PriceEvent> ignessPublisher, MockTimeProvider timeProvider) {
+    private static void setupOldData(String currency, PricePublisher<Event<Price>> ignessPublisher, MockTimeProvider timeProvider) {
         ignessPublisher.publish(new PriceEvent(new Price(currency, timeProvider.now(), 13.5, 2000)));
     }
 

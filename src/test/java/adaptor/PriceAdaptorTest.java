@@ -1,5 +1,9 @@
 package adaptor;
 
+import common.NanoTimeProvider;
+import data.Event;
+import data.EventFactory;
+import data.Price;
 import data.PriceEvent;
 import feed.PriceFeedHandler;
 import util.SimulatePriceFeeder;
@@ -14,13 +18,14 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class PriceAdaptorTest {
     @Mock
-    Publisher<PriceEvent> publisher;
+    Publisher<Event<Price>> publisher;
 
     @Test
     public void testFeedHaveDataThenPricePublish() throws Exception {
         SimulatePriceFeeder priceFeeder = new SimulatePriceFeeder();
         PriceFeedHandler priceFeedHandler = new PriceFeedHandler();
-        PriceAdaptor priceAdaptor = new PriceAdaptor(priceFeedHandler, publisher, priceFeeder);
+        EventFactory factory = new EventFactory(new NanoTimeProvider());
+        PriceAdaptor priceAdaptor = new PriceAdaptor(priceFeedHandler, publisher, priceFeeder, factory);
         priceAdaptor.start();
         String data = "9:30 AM AUD/USD 0.6905 106,198";
         priceFeeder.pushData(data);
@@ -33,7 +38,8 @@ class PriceAdaptorTest {
     public void testWrongFeedWillNotCrashSystemAndSkipTheMessage() throws Exception {
         SimulatePriceFeeder priceFeeder = new SimulatePriceFeeder();
         PriceFeedHandler priceFeedHandler = new PriceFeedHandler();
-        PriceAdaptor priceAdaptor = new PriceAdaptor(priceFeedHandler, publisher, priceFeeder);
+        EventFactory factory = new EventFactory(new NanoTimeProvider());
+        PriceAdaptor priceAdaptor = new PriceAdaptor(priceFeedHandler, publisher, priceFeeder, factory);
         priceAdaptor.start();
         String data = "9:30 AM AUD/USD 0.6905 106,198";
         priceFeeder.pushData(data);

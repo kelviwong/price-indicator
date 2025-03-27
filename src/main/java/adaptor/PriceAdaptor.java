@@ -1,8 +1,7 @@
 package adaptor;
 
 import common.NamedThreadFactory;
-import data.Price;
-import data.PriceEvent;
+import data.*;
 import feed.FeedHandler;
 import feeder.PriceFeeder;
 import org.slf4j.Logger;
@@ -16,17 +15,20 @@ import java.util.concurrent.Executors;
 public class PriceAdaptor implements IService, IAdaptor {
     private final ExecutorService executorService;
     private final FeedHandler<String> feedHandler;
-    private final Publisher<PriceEvent> publisher;
+    private final Publisher<Event<Price>> publisher;
     private final PriceFeeder<String> feeder;
     private volatile boolean isStop;
 
     private static final Logger logger = LoggerFactory.getLogger(PriceAdaptor.class);
 
-    public PriceAdaptor(FeedHandler<String> feedHandler, Publisher<PriceEvent> publisher, PriceFeeder<String> feeder) {
+    EventFactory eventFactory;
+
+    public PriceAdaptor(FeedHandler<String> feedHandler, Publisher<Event<Price>> publisher, PriceFeeder<String> feeder, EventFactory eventFactory) {
         this.feedHandler = feedHandler;
         this.publisher = publisher;
         this.feeder = feeder;
         this.isStop = false;
+        this.eventFactory = eventFactory;
 
         executorService = Executors.newSingleThreadExecutor(new NamedThreadFactory("PriceAdaptor"));
     }
@@ -34,8 +36,9 @@ public class PriceAdaptor implements IService, IAdaptor {
     @Override
     public void process() throws Exception {
         String data = feeder.getData();
+        Event<Price> event = eventFactory.getEvent(EventType.PRICE);
         Price price = feedHandler.process(data);
-        PriceEvent event = new PriceEvent(price);
+        event.setData(price);
         publisher.publish(event);
 
     }

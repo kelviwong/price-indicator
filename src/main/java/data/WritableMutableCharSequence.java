@@ -85,6 +85,7 @@ public class WritableMutableCharSequence {
 
     public void clear() {
         offset = 0;
+        endIndex = 0;
     }
 
     public int length() {

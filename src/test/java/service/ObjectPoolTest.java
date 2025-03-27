@@ -10,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ObjectPoolTest {
     ObjectPool<IndicatorEvent> objectPool;
+
     @Test
     public void testBasic() {
         objectPool = new ObjectPool<>(1, () -> new IndicatorEvent(null));
@@ -29,8 +30,10 @@ class ObjectPoolTest {
 
         event = objectPool.acquire();
         assertEquals(0, objectPool.size());
-        assertNull(event.getData());
+        assertEquals(0.0d, event.getData().getVwap());
+        assertEquals("", event.getData().getCurrency().toString());
     }
+
     @Test
     public void ShouldExpandWhenAcquireReachMaxSize() {
         objectPool = new ObjectPool<>(1, () -> new IndicatorEvent(null));

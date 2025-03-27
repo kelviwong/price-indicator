@@ -24,24 +24,14 @@ public class PriceService implements IService {
     private final ExecutorService executorService;
     private final DispatcherAgent dispatcherAgent;
     private volatile boolean isStopped = false;
-    private final PriceReader<PriceEvent> priceReader;
-    private final Publisher<IndicatorEvent> publisher;
+    private final PriceReader<Event<Price>> priceReader;
     private final Map<WritableMutableCharSequence, IStore<Price>> currencyPriceVolMap;
-    private final Map<WritableMutableCharSequence, AnalyticData> analyticDataMap;
-    private final PriceStoreFactory priceStoreFactory;
-    private final Config config;
 
-    public PriceService(PriceReader<PriceEvent> priceReader, TimeProvider timeProvider,
-                        Publisher<IndicatorEvent> publisher, PriceStoreFactory priceStoreFactory, DispatcherAgent dispatcherAgent,
-                        Config config) {
+    public PriceService(PriceReader<Event<Price>> priceReader, DispatcherAgent dispatcherAgent) {
         this.executorService = Executors.newSingleThreadExecutor(new NamedThreadFactory("PriceService"));
         this.priceReader = priceReader;
-        this.publisher = publisher;
         this.currencyPriceVolMap = new ConcurrentHashMap<>();
-        this.analyticDataMap = new ConcurrentHashMap<>();
-        this.priceStoreFactory = priceStoreFactory;
         this.dispatcherAgent = dispatcherAgent;
-        this.config = config;
     }
 
     @Override
@@ -49,7 +39,7 @@ public class PriceService implements IService {
         logger.info("Start Price Service");
         executorService.execute(() -> {
             while (!isStopped) {
-                PriceEvent event = null;
+                Event<Price> event = null;
                 try {
                     event = priceReader.poll();
                     if (event != null) {
@@ -66,12 +56,12 @@ public class PriceService implements IService {
     @Override
     public void stop() {
         logger.info("Stop Price Service");
-        if (currencyPriceVolMap != null) {
-            Collection<IStore<Price>> values = currencyPriceVolMap.values();
-            for (IStore<Price> value : values) {
-                value.close();
-            }
-        }
+//        if (currencyPriceVolMap != null) {
+//            Collection<IStore<Price>> values = currencyPriceVolMap.values();
+//            for (IStore<Price> value : values) {
+//                value.close();
+//            }
+//        }
 
         ServiceUtil.quietlyStop(dispatcherAgent);
 

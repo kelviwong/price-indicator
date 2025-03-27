@@ -4,6 +4,7 @@ import common.PriceStoreFactory;
 import config.Config;
 import data.*;
 import indicator.ICalculator;
+import latency.LatencyTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import publisher.PooledPublisher;
@@ -54,15 +55,17 @@ public class VwapPriceEventHandler implements EventHandler<PriceEvent> {
         if (publisher instanceof PooledPublisher) {
             indicatorEvent = ((PooledPublisher<IndicatorEvent>) publisher).acquire();
         } else {
-            indicatorEvent = new IndicatorEvent(null);
+            indicatorEvent = new IndicatorEvent();
         }
         indicatorEvent.setData(analyticData);
+        LatencyTracker.copyStartNs(event, indicatorEvent);
 
         calculator.calculateWithDelta(data, priceStore, analyticData);
         long now = data.getTimestamp();
         long expiredTimeInMills = now - config.getVwapConfig().getVwapIntervalInMs();
         // only publish when vwap is larger than 0 && the data have 1 hour long
         if (analyticData.getVwap() > 0 && expiredTimeInMills >= analyticData.getFirstDataTime()) {
+            // TODO: should make this serialize publisher in another thread queue
             publisher.publish(indicatorEvent);
         }
     }

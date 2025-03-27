@@ -1,8 +1,10 @@
 package publisher;
 
+import data.Event;
+
 import java.util.concurrent.BlockingQueue;
 
-public class PriceReader<T> implements Reader<T> {
+public class PriceReader<T extends Event<?>> implements Reader<T> {
     BlockingQueue<T> queue;
 
     public PriceReader(BlockingQueue<T> queue) {

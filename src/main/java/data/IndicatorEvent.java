@@ -1,12 +1,14 @@
 package data;
 
 public class IndicatorEvent extends Event<AnalyticData> implements Resettable {
+    public IndicatorEvent() {
+        super();
+    }
     public IndicatorEvent(AnalyticData data) {
         super(data);
     }
 
     StringBuilder sb = new StringBuilder();
-
     @Override
     public String toString() {
         sb.setLength(0);
@@ -23,6 +25,6 @@ public class IndicatorEvent extends Event<AnalyticData> implements Resettable {
 
     @Override
     public void reset() {
-        data = null;
+        data.clear();
     }
 }

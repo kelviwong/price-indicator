@@ -1,5 +1,7 @@
 package publisher;
 
-public interface Publisher<T> {
+import data.Event;
+
+public interface Publisher<T extends Event<?>> {
     void publish(T data);
 }

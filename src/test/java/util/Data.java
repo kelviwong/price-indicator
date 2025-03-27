@@ -2,6 +2,7 @@ package util;
 
 import common.MockTimeProvider;
 import config.Config;
+import data.Event;
 import data.Price;
 import data.PriceEvent;
 import data.WritableMutableCharSequence;
@@ -19,7 +20,7 @@ public class Data {
         return abc;
     }
 
-    public static void setup59MinutesOldData(PricePublisher<PriceEvent> publisher, MockTimeProvider mockTimeProvider, String currency, double adjustPrice) throws InterruptedException {
+    public static void setup59MinutesOldData(PricePublisher<Event<Price>> publisher, MockTimeProvider mockTimeProvider, String currency, double adjustPrice) throws InterruptedException {
         publisher.publish(new PriceEvent(new Price(currency, mockTimeProvider.now(), 12.5 + adjustPrice, 2000)));
         mockTimeProvider.advanceInMinutes(5);
         publisher.publish(new PriceEvent(new Price(currency, mockTimeProvider.now(), 10.5 + adjustPrice, 1000)));
