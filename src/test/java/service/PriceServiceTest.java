@@ -6,6 +6,7 @@ import config.Config;
 import data.IndicatorEvent;
 import data.Price;
 import data.PriceEvent;
+import data.WritableMutableCharSequence;
 import dispatcher.DispatcherAgent;
 import dispatcher.HashSymbolDispatchStrategy;
 import dispatcher.RoundRobinDispatchStrategy;
@@ -63,11 +64,11 @@ class PriceServiceTest {
         DispatcherAgent dispatcherAgent = new DispatcherAgent(config.getDispatcherConfig().getThreads(), new HashSymbolDispatchStrategy());
         PriceService priceService = new PriceService(priceReader, timeProvider, publisher, priceStoreFactory, dispatcherAgent, config);
         priceService.start();
-        String currency = "AUD/USD";
+        WritableMutableCharSequence currency = Data.getOffheapChar("AUD/USD");
 
         timeProvider.advanceInMinutes(-59);
         assertEquals("09:01:00", timeProvider.getCurrentTime());
-        setup59MinutesOldData(ignessPublisher, timeProvider, currency, 0.0d);
+        setup59MinutesOldData(ignessPublisher, timeProvider, currency.toString(), 0.0d);
         assertEquals("10:00:00", timeProvider.getCurrentTime());
 
         // nothing publish as there are no 1 hour long data
@@ -98,7 +99,7 @@ class PriceServiceTest {
         // nothing publish
         assertNull(publisher.getLastEvent());
 
-        currency = "JPY/USD";
+        currency = Data.getOffheapChar("JPY/USD");
         timeProvider.advanceInMinutes(1);
         assertEquals("10:02:01", timeProvider.getCurrentTime());
         ignessPublisher.publish(new PriceEvent(new Price(currency, timeProvider.now(), 232.4, 12000)));

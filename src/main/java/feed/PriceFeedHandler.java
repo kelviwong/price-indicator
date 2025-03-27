@@ -1,13 +1,17 @@
 package feed;
 
 import data.Price;
+import data.WritableMutableCharSequence;
+import lombok.Locked;
 import util.DateTimeParser;
 import vaildation.PriceValidationRule;
 import vaildation.ValidationRule;
 import vaildation.VolumeValidationRule;
 
 import java.time.*;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import static util.FeedUtil.parseDouble;
@@ -24,6 +28,9 @@ public class PriceFeedHandler implements FeedHandler<String> {
         validationRules.add(new VolumeValidationRule());
     }
 
+    Map<WritableMutableCharSequence,WritableMutableCharSequence> hashedSymbol = new HashMap<>();
+    WritableMutableCharSequence tempCurrency = new WritableMutableCharSequence(20);
+
     // The price feed data
     // TimeStamp currencyPair price volume
     @Override
@@ -31,15 +38,22 @@ public class PriceFeedHandler implements FeedHandler<String> {
         // 9:30 AM AUD/USD 0.6905 106,198
         int space1 = feed.indexOf(' ');
         int space2 = feed.indexOf(' ', space1 + 1);
-        String timeStr = feed.substring(0, space2);
-        long time = parseTime(timeStr);
+//        String timeStr = feed.substring(0, space2);
+//        long time = parseTime(timeStr);
+        long time = parseTime(feed);
 
         int space3 = feed.indexOf(' ', space2 + 1);
         int space4 = feed.indexOf(' ', space3 + 1);
 
         double price = parseDouble(feed, space3 + 1, space4);
         long volume = parseLongWithCommas(feed, space4 + 1, feed.length());
-        Price ultimatePrice = new Price(feed.substring(space2 + 1, space3), time, price, volume);
+        WritableMutableCharSequence currency = tempCurrency.append(feed, space2 + 1, space3);
+        WritableMutableCharSequence symbol = hashedSymbol.get(currency);
+        if (symbol == null) {
+            symbol = new WritableMutableCharSequence(currency);
+            hashedSymbol.put(symbol, symbol);
+        }
+        Price ultimatePrice = new Price(symbol, time, price, volume);
         for (ValidationRule<Price> rule : validationRules) {
             String check = rule.check(ultimatePrice);
             if (!check.isEmpty()) {
@@ -50,6 +64,7 @@ public class PriceFeedHandler implements FeedHandler<String> {
     }
 
     LocalDate currentDate = LocalDate.now();
+
     private long parseTime(String feed) {
         // Parse the time string
         // profiler show that this generate a bit garbage, improve by manually parsing it.
@@ -63,5 +78,4 @@ public class PriceFeedHandler implements FeedHandler<String> {
         long epochMillis = dateTime.toEpochSecond(offset) * 1000 + dateTime.getNano() / 1_000_000;
         return epochMillis;
     }
-
 }

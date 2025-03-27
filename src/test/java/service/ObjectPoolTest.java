@@ -2,6 +2,7 @@ package service;
 
 import data.AnalyticData;
 import data.IndicatorEvent;
+import data.WritableMutableCharSequence;
 import org.junit.jupiter.api.Test;
 import util.ObjectPool;
 
@@ -17,9 +18,11 @@ class ObjectPoolTest {
         IndicatorEvent event = objectPool.acquire();
         assertNotNull(event);
         assertEquals(0, objectPool.size());
-        event.setData(new AnalyticData("AUD/USD"));
+        WritableMutableCharSequence writableMutableCharSequence = new WritableMutableCharSequence(20);
+        writableMutableCharSequence.copy("AUD/USD");
+        event.setData(new AnalyticData(writableMutableCharSequence));
 
-        assertEquals("AUD/USD", event.getData().getCurrency());
+        assertEquals(writableMutableCharSequence, event.getData().getCurrency());
 
         objectPool.release(event);
         assertEquals(1, objectPool.size());

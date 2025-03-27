@@ -3,10 +3,11 @@ package data;
 import lombok.Data;
 
 import java.nio.MappedByteBuffer;
+import java.util.Objects;
 
 @Data
 public class Price implements MemoryFileAware<Price> {
-    String currency;
+    WritableMutableCharSequence currency;
     long timestamp;
     double price;
     long volume;
@@ -17,6 +18,15 @@ public class Price implements MemoryFileAware<Price> {
     }
 
     public Price(String currency, long timestamp, double price, long volume) {
+        WritableMutableCharSequence currencyWr = new WritableMutableCharSequence(20);
+        currencyWr.copy(currency);
+        this.currency = currencyWr;
+        this.timestamp = timestamp;
+        this.price = price;
+        this.volume = volume;
+    }
+
+    public Price(WritableMutableCharSequence currency, long timestamp, double price, long volume) {
         this.currency = currency;
         this.timestamp = timestamp;
         this.price = price;
@@ -42,8 +52,17 @@ public class Price implements MemoryFileAware<Price> {
         setVolume(volume);
     }
 
+    public void setCurrency(String currency) {
+        this.currency.copy(currency);
+    }
+
+    public void setCurrency(WritableMutableCharSequence currency) {
+        this.currency = currency;
+    }
+
     public void clear() {
-        this.currency = "";
+        if (this.currency != null)
+            this.currency.clear();
         this.timestamp = 0L;
         this.price = 0.0;
         this.volume = 0L;

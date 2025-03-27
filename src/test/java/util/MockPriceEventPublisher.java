@@ -24,7 +24,7 @@ public class MockPriceEventPublisher<T extends IndicatorEvent> extends PricePubl
     @Override
     public void publish(T data) {
         lastEvent = data;
-        lastEvents.put(data.getData().getCurrency(), data);
+        lastEvents.put(data.getData().getCurrency().toString(), data);
         logger.info("Publishing: {}", data);
         super.publish(data);
     }

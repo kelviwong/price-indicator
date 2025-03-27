@@ -4,6 +4,7 @@ import common.MockTimeProvider;
 import config.Config;
 import data.Price;
 import data.PriceEvent;
+import data.WritableMutableCharSequence;
 import publisher.PricePublisher;
 
 import java.io.IOException;
@@ -11,6 +12,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Data {
+
+    public static WritableMutableCharSequence getOffheapChar(String value) {
+        WritableMutableCharSequence abc = new WritableMutableCharSequence(20);
+        abc.copy(value);
+        return abc;
+    }
 
     public static void setup59MinutesOldData(PricePublisher<PriceEvent> publisher, MockTimeProvider mockTimeProvider, String currency, double adjustPrice) throws InterruptedException {
         publisher.publish(new PriceEvent(new Price(currency, mockTimeProvider.now(), 12.5 + adjustPrice, 2000)));

@@ -4,10 +4,7 @@ import Util.ServiceUtil;
 import common.NamedThreadFactory;
 import common.TimeProvider;
 import config.Config;
-import data.AnalyticData;
-import data.IndicatorEvent;
-import data.Price;
-import data.PriceEvent;
+import data.*;
 import dispatcher.DispatcherAgent;
 import indicator.Calculator;
 import indicator.VwapTask;
@@ -33,8 +30,8 @@ public class PriceService implements IService {
     private volatile boolean isStopped = false;
     private final PriceReader<PriceEvent> priceReader;
     private final Publisher<IndicatorEvent> publisher;
-    private final Map<String, IStore<Price>> currencyPriceVolMap;
-    private final Map<String, AnalyticData> analyticDataMap;
+    private final Map<WritableMutableCharSequence, IStore<Price>> currencyPriceVolMap;
+    private final Map<WritableMutableCharSequence, AnalyticData> analyticDataMap;
     private final PriceStoreFactory priceStoreFactory;
     private final Config config;
 

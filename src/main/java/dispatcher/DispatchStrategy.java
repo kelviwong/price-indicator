@@ -1,5 +1,7 @@
 package dispatcher;
 
+import data.WritableMutableCharSequence;
+
 public interface DispatchStrategy {
-    int getThreadId(String symbol, int numOfThreads);
+    int getThreadId(WritableMutableCharSequence symbol, int numOfThreads);
 }
