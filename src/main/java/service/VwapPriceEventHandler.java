@@ -2,10 +2,7 @@ package service;
 
 import common.PriceStoreFactory;
 import config.Config;
-import data.AnalyticData;
-import data.IndicatorEvent;
-import data.Price;
-import data.PriceEvent;
+import data.*;
 import indicator.ICalculator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,14 +14,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class VwapPriceEventHandler implements EventHandler<PriceEvent> {
-    private final Map<String, IStore<Price>> currencyPriceVolMap;
-    private final Map<String, AnalyticData> analyticDataMap;
+    private final Map<WritableMutableCharSequence, IStore<Price>> currencyPriceVolMap;
+    private final Map<WritableMutableCharSequence, AnalyticData> analyticDataMap;
     private PriceStoreFactory priceStoreFactory;
     private static final Logger logger = LoggerFactory.getLogger(VwapPriceEventHandler.class);
     private final ICalculator calculator;
-
     private Config config;
-
     private Publisher<IndicatorEvent> publisher;
 
     public VwapPriceEventHandler(
@@ -40,20 +35,20 @@ public class VwapPriceEventHandler implements EventHandler<PriceEvent> {
     @Override
     public void handle(PriceEvent event) throws Exception {
         Price data = event.getData();
-        IStore<Price> priceStore = currencyPriceVolMap.computeIfAbsent(data.getCurrency(), (k) -> {
-            try {
-                return priceStoreFactory.createStore(k);
-            } catch (Exception e) {
-                logger.error("Error price store : {}", k, e);
-                throw new RuntimeException(e);
-            }
-        });
 
-        AnalyticData analyticData = analyticDataMap.computeIfAbsent(data.getCurrency(), (k) -> {
-            AnalyticData firstData = new AnalyticData(k);
-            firstData.setFirstDataTime(data.getTimestamp());
-            return firstData;
-        });
+        WritableMutableCharSequence currency = data.getCurrency();
+        IStore<Price> priceStore = currencyPriceVolMap.get(currency);
+        if (priceStore == null) {
+            priceStore = priceStoreFactory.createStore(currency);
+            currencyPriceVolMap.put(currency, priceStore);
+        }
+
+        AnalyticData analyticData = analyticDataMap.get(currency);
+        if (analyticData == null) {
+            analyticData = new AnalyticData(currency);
+            analyticData.setFirstDataTime(data.getTimestamp());
+            analyticDataMap.put(currency, analyticData);
+        }
 
         IndicatorEvent indicatorEvent;
         if (publisher instanceof PooledPublisher) {

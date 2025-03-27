@@ -54,8 +54,8 @@ public class SimpleTester {
     }
 
     public void start() {
-        long time = setCurrentTime("08:00:00");
-        ArrayList<String> strings = generateString(10000, time);
+        long time = setCurrentTime("01:00:00");
+        ArrayList<String> strings = generateString(30000, time);
         AtomicInteger counter = new AtomicInteger(0);
         executor.scheduleAtFixedRate(() -> {
             try {

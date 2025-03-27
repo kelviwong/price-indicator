@@ -22,7 +22,7 @@ public class NamedThreadFactory implements ThreadFactory {
         thread.setName(baseName + "-" + counter.getAndIncrement());
         thread.setUncaughtExceptionHandler((t, e) -> {
             logger.error("Uncaught exception in thread: " + t.getName());
-            logger.error("Exception: " + e.getMessage());
+            logger.error("Exception: ", e);
         });
         return thread;
     }

@@ -1,80 +1,63 @@
 package feed;
 
 import data.Price;
+import data.WritableMutableCharSequence;
 import vaildation.PriceValidationRule;
 import vaildation.ValidationRule;
 import vaildation.VolumeValidationRule;
 
-import java.time.*;
-import java.time.format.DateTimeFormatter;
-import java.util.HashSet;
-import java.util.Locale;
-import java.util.Set;
+import java.util.*;
+
+import static util.DateTimeParser.parseTime;
+import static util.FeedUtil.parseDouble;
+import static util.FeedUtil.parseLongWithCommas;
 
 public class PriceFeedHandler implements FeedHandler<String> {
-    private final Set<ValidationRule<Price>> validationRules;
-    DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("h:mm a", Locale.ENGLISH);
+    private final List<ValidationRule<Price>> validationRules;
+    //    DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("h:mm a", Locale.ENGLISH);
     final StringBuilder sb = new StringBuilder();
 
     public PriceFeedHandler() {
-        validationRules = new HashSet<>();
+        validationRules = new ArrayList<>();
         validationRules.add(new PriceValidationRule());
         validationRules.add(new VolumeValidationRule());
     }
+
+    Map<WritableMutableCharSequence,WritableMutableCharSequence> hashedSymbol = new HashMap<>();
+    WritableMutableCharSequence tempCurrency = new WritableMutableCharSequence(20);
 
     // The price feed data
     // TimeStamp currencyPair price volume
     @Override
     public Price process(String feed) throws Exception {
         // 9:30 AM AUD/USD 0.6905 106,198
+        int space1 = feed.indexOf(' ');
+        int space2 = feed.indexOf(' ', space1 + 1);
+//        String timeStr = feed.substring(0, space2);
+//        long time = parseTime(timeStr);
+        long time = parseTime(feed);
 
-        String[] feedSplit = feed.split(" ");
-        if (feedSplit.length < 5) {
-            throw new Exception("Incorrect feed. " + feed);
+        int space3 = feed.indexOf(' ', space2 + 1);
+        int space4 = feed.indexOf(' ', space3 + 1);
+
+        double price = parseDouble(feed, space3 + 1, space4);
+        long volume = parseLongWithCommas(feed, space4 + 1, feed.length());
+        WritableMutableCharSequence currency = tempCurrency.append(feed, space2 + 1, space3);
+        WritableMutableCharSequence symbol = hashedSymbol.get(currency);
+        if (symbol == null) {
+            symbol = new WritableMutableCharSequence(currency);
+            hashedSymbol.put(symbol, symbol);
         }
+        Price ultimatePrice = new Price(symbol, time, price, volume);
 
-        sb.setLength(0);
-        long time = parseTime(sb.append(feedSplit[0]).append(" ").append(feedSplit[1]).toString());
-
-        double price = Double.parseDouble(feedSplit[3]);
-        long volume = parseLong(feedSplit[4], ',');
-        Price ultimatePrice = new Price(feedSplit[2], time, price, volume);
-        for (ValidationRule<Price> rule : validationRules) {
-            String check = rule.check(ultimatePrice);
+        int size = validationRules.size();
+        for (int i = 0; i < size; i++) {
+            String check = validationRules.get(i).check(ultimatePrice);
             if (!check.isEmpty()) {
                 throw new Exception(check);
             }
         }
+
         return ultimatePrice;
     }
-
-    private long parseLong(String volumeStr, char removeChar) {
-        int length = volumeStr.length();
-        sb.setLength(0);
-        for (int i = 0; i < length; i++) {
-            char c = volumeStr.charAt(i);
-            if (c == removeChar) {
-                continue;
-            }
-            sb.append(c);
-        }
-
-        // this parseLong can further improve by directly consume sb
-        // so as to reduce garbage
-        return Long.parseLong(sb.toString());
-    }
-
-    private long parseTime(String feed) {
-        // Parse the time string
-        LocalTime localTime = LocalTime.parse(feed.trim(), timeFormatter);
-
-        // Combine with the current date
-        LocalDate currentDate = LocalDate.now();
-        LocalDateTime dateTime = LocalDateTime.of(currentDate, localTime);
-
-        // Convert to milliseconds since epoch
-        ZonedDateTime zonedDateTime = dateTime.atZone(ZoneId.systemDefault());
-        return zonedDateTime.toInstant().toEpochMilli();
-    }
-
 }

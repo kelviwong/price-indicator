@@ -1,5 +1,7 @@
 package dispatcher;
 
+import data.WritableMutableCharSequence;
+import org.junit.jupiter.api.BeforeAll;
 import common.PriceStoreFactory;
 import config.Config;
 import data.Price;
@@ -40,19 +42,24 @@ class DispatcherAgentTest {
 
     }
 
+    private static WritableMutableCharSequence symbolA;
+    private static WritableMutableCharSequence symbolB;
+    private static WritableMutableCharSequence symbolC;
+
+    @BeforeAll
+    public static void setup() {
+        symbolA = (new WritableMutableCharSequence(20)).copy("AUD/USD");
+        symbolB = (new WritableMutableCharSequence(20)).copy("EUR/USD");
+        symbolC = (new WritableMutableCharSequence(20)).copy("JPY/USD");
+    }
+
     @Test
     public void testDispatcherAgentShouldAlwaysUseSameThreadWithSameCode() {
         DispatcherAgent dispatcherAgent = new DispatcherAgent(5, new HashSymbolDispatchStrategy(), supplier);
         dispatcherAgent.start();
-        String symbolA = "AUD/USD";
-        String symbolB = "EUR/USD";
-        String symbolC = "JPY/USD";
-        ExecutorService executorServiceA = dispatcherAgent.dispatchTask(symbolA, () -> {
-        });
-        ExecutorService executorServiceB = dispatcherAgent.dispatchTask(symbolB, () -> {
-        });
-        ExecutorService executorServiceC = dispatcherAgent.dispatchTask(symbolC, () -> {
-        });
+        ExecutorService executorServiceA = dispatcherAgent.dispatchTask(symbolA, () -> {});
+        ExecutorService executorServiceB = dispatcherAgent.dispatchTask(symbolB, () -> {});
+        ExecutorService executorServiceC =  dispatcherAgent.dispatchTask(symbolC, () -> {});
 
         ExecutorService executorService = dispatcherAgent.dispatchTask(symbolB, () -> {
         });
@@ -70,9 +77,6 @@ class DispatcherAgentTest {
     public void testDispatcherAgentShouldAlwaysUseSameThreadWithSameCodeWorker() {
         DispatcherAgent dispatcherAgent = new DispatcherAgent(5, new HashSymbolDispatchStrategy(), supplier);
         dispatcherAgent.start();
-        String symbolA = "AUD/USD";
-        String symbolB = "EUR/USD";
-        String symbolC = "JPY/USD";
         PriceEvent event = new PriceEvent(new Price());
         EventWorker workerA = dispatcherAgent.dispatchQueue(symbolA, event);
         EventWorker workerB = dispatcherAgent.dispatchQueue(symbolB, event);
@@ -88,14 +92,10 @@ class DispatcherAgentTest {
         dispatcherAgent.stop();
     }
 
-
     @Test
     public void testDispatcherShouldRoundRobinTheThread() {
         DispatcherAgent dispatcherAgent = new DispatcherAgent(5, new RoundRobinDispatchStrategy(), supplier);
         dispatcherAgent.start();
-        String symbolA = "AUD/USD";
-        String symbolB = "EUR/USD";
-        String symbolC = "JPY/USD";
         ExecutorService[] executors = dispatcherAgent.getExecutors();
 
         ExecutorService executorServiceA = dispatcherAgent.dispatchTask(symbolA, () -> {
@@ -133,9 +133,6 @@ class DispatcherAgentTest {
         HashSymbolDispatchStrategy dispatchStrategy = new HashSymbolDispatchStrategy();
         DispatcherAgent dispatcherAgent = new DispatcherAgent(5, dispatchStrategy, supplier);
         dispatcherAgent.start();
-        String symbolA = "AUD/USD";
-        String symbolB = "EUR/USD";
-        String symbolC = "JPY/USD";
         ExecutorService[] executors = dispatcherAgent.getExecutors();
 
         ExecutorService executorServiceC = dispatcherAgent.dispatchTask(symbolC, () -> {

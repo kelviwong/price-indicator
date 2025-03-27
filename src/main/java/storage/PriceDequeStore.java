@@ -1,6 +1,7 @@
 package storage;
 
 import data.Price;
+import data.WritableMutableCharSequence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,7 +12,7 @@ public class PriceDequeStore implements IStore<Price> {
     protected static final Logger logger = LoggerFactory.getLogger(PriceDequeStore.class);
 
     ArrayDeque<Price> store;
-    public PriceDequeStore(String currency) {
+    public PriceDequeStore(WritableMutableCharSequence currency) {
         this.store = new ArrayDeque<>();
         logger.info("Created PriceDequeStore for {}", currency);
     }

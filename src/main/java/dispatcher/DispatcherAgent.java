@@ -1,6 +1,7 @@
 package dispatcher;
 
 import common.NamedThreadFactory;
+import data.WritableMutableCharSequence;
 import org.agrona.collections.Object2IntHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +18,7 @@ public class DispatcherAgent<T> implements IService {
 
     int numOfThread;
 
-    private final Object2IntHashMap<String> symbolMappedThread;
+    private final Object2IntHashMap<WritableMutableCharSequence> symbolMappedThread;
     private final ExecutorService[] executors;
     private final DispatchStrategy dispatchStrategy;
 
@@ -42,7 +43,7 @@ public class DispatcherAgent<T> implements IService {
         logger.info("Creating Dispatcher Agent, numOfThread: {}, dispatchType: {}", numOfThread, dispatchStrategy);
     }
 
-    public ExecutorService dispatchTask(String symbol, Runnable task) {
+    public ExecutorService dispatchTask(WritableMutableCharSequence symbol, Runnable task) {
         int threadNo = symbolMappedThread.getValue(symbol);
         if (threadNo == symbolMappedThread.missingValue()) {
             threadNo = dispatchStrategy.getThreadId(symbol, numOfThread);
@@ -54,7 +55,7 @@ public class DispatcherAgent<T> implements IService {
         return executorService;
     }
 
-    public EventWorker dispatchQueue(String symbol, T event) {
+    public EventWorker dispatchQueue(WritableMutableCharSequence symbol, T event) {
         int threadNo = symbolMappedThread.getValue(symbol);
         if (threadNo == symbolMappedThread.missingValue()) {
             threadNo = dispatchStrategy.getThreadId(symbol, numOfThread);
