@@ -21,7 +21,7 @@ class BackOffBlockingQueueTest {
     @BeforeEach
     public void setUp() throws Exception {
         timeProvider = new MockTimeProvider();
-        BackOffStrategy<PriceEvent> strategy = new RetryThenDropStrategy<>(3, 10,new LogDropConsumer<>());
+        BackOffStrategy<PriceEvent> strategy = new RetryThenDropStrategy<>(3, 100,new LogDropConsumer<>());
         backOffBlockingQueue = QueueFactory.createQueue(1, QueueType.BACKOFF, strategy);
     }
 
