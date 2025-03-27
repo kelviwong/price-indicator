@@ -31,7 +31,7 @@ class ObjectPoolTest {
         event = objectPool.acquire();
         assertEquals(0, objectPool.size());
         assertEquals(0.0d, event.getData().getVwap());
-        assertEquals("", event.getData().getCurrency().toString());
+        assertEquals("AUD/USD", event.getData().getCurrency().toString());
     }
 
     @Test
