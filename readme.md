@@ -63,3 +63,9 @@ Build:
 2. the command prompt can add price like below:
    addprice 9:30 AM AUD/USD 0.6905 106,198
 3. adjust the time and price.
+
+Misc
+2025-03-28 10:12:39 [main] INFO  publisher.LatencyPublisher - === Latency ===
+2025-03-28 10:12:39 [main] INFO  publisher.LatencyPublisher - P99 : 81 us
+2025-03-28 10:12:39 [main] INFO  publisher.LatencyPublisher - Max : 10977 us
+2025-03-28 10:12:39 [main] INFO  publisher.LatencyPublisher - total records : 12805
