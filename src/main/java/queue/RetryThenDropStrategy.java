@@ -1,7 +1,7 @@
 package queue;
 
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.LockSupport;
 import java.util.function.Consumer;
 
 public class RetryThenDropStrategy<T> implements BackOffStrategy<T> {
@@ -17,13 +17,17 @@ public class RetryThenDropStrategy<T> implements BackOffStrategy<T> {
     }
 
     @Override
-    public boolean offer(BlockingQueue<T> queue, T item) {
+    public boolean offer(QueueWriter<T> writer, T item) {
         for (int i = 0; i < maxRetries; i++) {
             try {
-                if (queue.offer(item, retryDelayMicros, TimeUnit.MICROSECONDS)) {
+                if (writer.write(item)) {
                     return true;
                 }
-            } catch (InterruptedException e) {
+
+                if (!writer.isBlocking() && retryDelayMicros > 0) {
+                    LockSupport.parkNanos(TimeUnit.MICROSECONDS.toNanos(retryDelayMicros));
+                }
+            } catch (Exception e) {
                 Thread.currentThread().interrupt();
                 return false;
             }
@@ -32,4 +36,19 @@ public class RetryThenDropStrategy<T> implements BackOffStrategy<T> {
         dropConsumer.accept(item);
         return false;
     }
+//    public boolean offer(BlockingQueue<T> queue, T item) {
+//        for (int i = 0; i < maxRetries; i++) {
+//            try {
+//                if (queue.offer(item, retryDelayMicros, TimeUnit.MICROSECONDS)) {
+//                    return true;
+//                }
+//            } catch (InterruptedException e) {
+//                Thread.currentThread().interrupt();
+//                return false;
+//            }
+//        }
+//
+//        dropConsumer.accept(item);
+//        return false;
+//    }
 }

@@ -1,6 +1,8 @@
 package feeder.prompt;
 
 import common.NamedThreadFactory;
+import data.Event;
+import data.Price;
 import enums.CommandType;
 import feeder.PriceFeeder;
 import printer.SystemOutPrinter;

@@ -15,20 +15,20 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class BackOffBlockingQueueTest {
 
-    private BlockingQueue<PriceEvent> backOffBlockingQueue;
+    private MessageQueue<PriceEvent> backOffBlockingQueue;
     private MockTimeProvider timeProvider;
 
     @BeforeEach
     public void setUp() throws Exception {
         timeProvider = new MockTimeProvider();
-        BackOffStrategy<PriceEvent> strategy = new RetryThenDropStrategy<>(3, 100,new LogDropConsumer<>());
-        backOffBlockingQueue = QueueFactory.createQueue(1, QueueType.BACKOFF, strategy);
+        BackOffStrategy<PriceEvent> strategy = new RetryThenDropStrategy<>(3, 100, new LogDropConsumer<>());
+        backOffBlockingQueue = QueueFactory.createMessageQueue(1, QueueType.BLOCKING_BACKOFF, null, strategy);
     }
 
     @Test
     public void testWhenItemThenInsertSuccessfully() throws InterruptedException {
         Price data = new Price("AUD/USD", timeProvider.now(), 11.2, 1000);
-        backOffBlockingQueue.offer(new PriceEvent(data));
+        backOffBlockingQueue.publish(new PriceEvent(data));
         PriceEvent item = backOffBlockingQueue.take();
         assertNotNull(item);
         assertEquals(data, item.getData());
@@ -38,10 +38,10 @@ class BackOffBlockingQueueTest {
     public void testWhenItemBackOffAndThenSuccessfully() throws InterruptedException {
         Price data = new Price("AUD/USD", timeProvider.now(), 11.2, 1000);
         PriceEvent priceEvent = new PriceEvent(data);
-        backOffBlockingQueue.offer(priceEvent);
+        backOffBlockingQueue.publish(priceEvent);
 
         PriceEvent priceEvent2 = new PriceEvent(data);
-        boolean result = backOffBlockingQueue.offer(priceEvent2);
+        boolean result = backOffBlockingQueue.publish(priceEvent2);
         assertFalse(result);
 
         // when there is something take
@@ -56,7 +56,7 @@ class BackOffBlockingQueueTest {
         TimeUnit.MICROSECONDS.sleep(20);
 
         PriceEvent priceEvent3 = new PriceEvent(data);
-        result = backOffBlockingQueue.offer(priceEvent3);
+        result = backOffBlockingQueue.publish(priceEvent3);
         assertTrue(result);
     }
 
@@ -70,11 +70,11 @@ class BackOffBlockingQueueTest {
         BackOffStrategy<PriceEvent> strategy = new RetryThenDropStrategy<>(3, 100, item -> {
             dropped.set(true);
         });
-        backOffBlockingQueue = QueueFactory.createQueue(1, QueueType.BACKOFF, strategy);
+        backOffBlockingQueue = QueueFactory.createMessageQueue(1, QueueType.BLOCKING_BACKOFF, null, strategy);
 
-        backOffBlockingQueue.offer(priceEvent);
+        backOffBlockingQueue.publish(priceEvent);
         // offer again but full
-        boolean offer = backOffBlockingQueue.offer(priceEvent);
+        boolean offer = backOffBlockingQueue.publish(priceEvent);
 
         assertFalse(offer);
         assertTrue(dropped.get());

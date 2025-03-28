@@ -1,11 +1,15 @@
 package dispatcher;
 
+import data.Event;
 import data.Price;
 import data.PriceEvent;
 import data.WritableMutableCharSequence;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import queue.MessageQueue;
+import queue.QueueFactory;
+import queue.QueueType;
 import service.EventWorker;
 
 import java.util.concurrent.ArrayBlockingQueue;
@@ -21,8 +25,14 @@ class DispatcherAgentTest {
     @BeforeEach
     public void setUp() {
         supplier = () -> {
-            BlockingQueue<PriceEvent> taskQueue = new ArrayBlockingQueue<>(1000);
-            EventWorker priceWorker = new EventWorker(taskQueue);
+//            BlockingQueue<PriceEvent> taskQueue = new ArrayBlockingQueue<>(1000);
+            MessageQueue<Event> messageQueue = null;
+            try {
+                messageQueue = QueueFactory.createMessageQueue(1000, QueueType.AGRONA_BACKOFF, null);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            EventWorker priceWorker = new EventWorker(messageQueue);
             return priceWorker;
         };
 
@@ -44,9 +54,12 @@ class DispatcherAgentTest {
     public void testDispatcherAgentShouldAlwaysUseSameThreadWithSameCode() {
         DispatcherAgent dispatcherAgent = new DispatcherAgent(5, new HashSymbolDispatchStrategy(), supplier);
         dispatcherAgent.start();
-        ExecutorService executorServiceA = dispatcherAgent.dispatchTask(symbolA, () -> {});
-        ExecutorService executorServiceB = dispatcherAgent.dispatchTask(symbolB, () -> {});
-        ExecutorService executorServiceC =  dispatcherAgent.dispatchTask(symbolC, () -> {});
+        ExecutorService executorServiceA = dispatcherAgent.dispatchTask(symbolA, () -> {
+        });
+        ExecutorService executorServiceB = dispatcherAgent.dispatchTask(symbolB, () -> {
+        });
+        ExecutorService executorServiceC = dispatcherAgent.dispatchTask(symbolC, () -> {
+        });
 
         ExecutorService executorService = dispatcherAgent.dispatchTask(symbolB, () -> {
         });

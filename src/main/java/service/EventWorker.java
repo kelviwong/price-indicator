@@ -3,12 +3,14 @@ package service;
 import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import queue.MessageQueue;
+
 import java.util.concurrent.BlockingQueue;
 
 public class EventWorker<T> implements Runnable, IService {
 
     @Getter
-    BlockingQueue<T> taskQueue;
+    MessageQueue<T> taskQueue;
 
     private EventHandler<T> eventHandler;
 
@@ -16,13 +18,13 @@ public class EventWorker<T> implements Runnable, IService {
 
     private volatile boolean running;
 
-    public EventWorker(BlockingQueue<T> taskQueue) {
+    public EventWorker(MessageQueue<T> taskQueue) {
         this.taskQueue = taskQueue;
         this.running = true;
     }
 
     public void submit(T event) {
-        this.taskQueue.offer(event);
+        this.taskQueue.publish(event);
     }
 
     public void registerHandler(EventHandler<T> handler) {

@@ -1,5 +1,5 @@
 package queue;
 
 public enum QueueType {
-    BACKOFF, NORMAL
+    BLOCKING_BACKOFF, DISRUPTOR_BACKOFF, AGRONA_BACKOFF, NORMAL
 }

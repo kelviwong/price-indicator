@@ -1,5 +1,7 @@
 package feeder.prompt;
 
+import data.Event;
+import data.Price;
 import feeder.PriceFeeder;
 import printer.SystemOutPrinter;
 

@@ -5,6 +5,7 @@ import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import publisher.PricePublisher;
+import queue.MessageQueue;
 
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
@@ -16,7 +17,7 @@ public class MockPriceEventPublisher<T extends IndicatorEvent> extends PricePubl
     Map<String, T> lastEvents = new ConcurrentHashMap<>();
     protected static final Logger logger = LoggerFactory.getLogger(MockPriceEventPublisher.class);
 
-    public MockPriceEventPublisher(BlockingQueue<T> queue) {
+    public MockPriceEventPublisher(MessageQueue<T> queue) {
         super(queue);
     }
 

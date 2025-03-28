@@ -12,11 +12,13 @@ class QueueFactoryTest {
 
     @Test
     public void testQueueFactory() throws Exception {
-        BlockingQueue<PriceEvent> queue = QueueFactory.createQueue(1, QueueType.BACKOFF);
-        BlockingQueue<PriceEvent> queue2 = QueueFactory.createQueue(1, QueueType.NORMAL);
+        MessageQueue<PriceEvent> queue = QueueFactory.createMessageQueue(10000, QueueType.BLOCKING_BACKOFF, null);;
+        MessageQueue<PriceEvent> queue2 = QueueFactory.createMessageQueue(10000, QueueType.AGRONA_BACKOFF, null);
+        MessageQueue<PriceEvent> queue3 = QueueFactory.createMessageQueue(10000, QueueType.NORMAL, null);
 
-        assertInstanceOf(BackOffBlockingQueue.class, queue);
-        assertInstanceOf(ArrayBlockingQueue.class, queue2);
+        assertInstanceOf(BlockingQueueWriter.class, queue.getQueueWriter());
+        assertInstanceOf(AgronaQueueWriter.class, queue2.getQueueWriter());
+        assertInstanceOf(BlockingQueueWriter.class, queue3.getQueueWriter());
     }
 
 }

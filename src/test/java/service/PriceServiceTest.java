@@ -14,6 +14,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import publisher.PricePublisher;
 import publisher.PriceReader;
+import queue.MessageQueue;
 import queue.QueueFactory;
 import queue.QueueType;
 import util.Data;
@@ -35,8 +36,8 @@ import static util.Data.setup59MinutesOldData;
 class PriceServiceTest {
     static Config config;
     private Supplier<EventWorker> supplier;
-    private BlockingQueue<IndicatorEvent> indicatorEventArrayBlockingQueue;
-    private BlockingQueue<Event<Price>> priceEventArrayBlockingQueue;
+    private MessageQueue<IndicatorEvent> indicatorEventArrayBlockingQueue;
+    private MessageQueue<Event<Price>> priceEventArrayBlockingQueue;
     private MockPriceEventPublisher<IndicatorEvent> publisher;
 
     @BeforeAll
@@ -46,8 +47,8 @@ class PriceServiceTest {
 
     @BeforeEach
     public void seteach() throws Exception {
-        indicatorEventArrayBlockingQueue = QueueFactory.createQueue(10000, QueueType.BACKOFF);
-        priceEventArrayBlockingQueue = QueueFactory.createQueue(10000, QueueType.BACKOFF);
+        indicatorEventArrayBlockingQueue = QueueFactory.createMessageQueue(10000, QueueType.BLOCKING_BACKOFF, null);
+        priceEventArrayBlockingQueue = QueueFactory.createMessageQueue(10000, QueueType.BLOCKING_BACKOFF, null);
         publisher = new MockPriceEventPublisher<>(indicatorEventArrayBlockingQueue);
     }
 
@@ -71,7 +72,12 @@ class PriceServiceTest {
         PriceStoreFactory priceStoreFactory = new PriceStoreFactory(storeType, "test2");
 
         supplier = () -> {
-            BlockingQueue<PriceEvent> taskQueue = new ArrayBlockingQueue<>(1000);
+            MessageQueue<PriceEvent> taskQueue = null;
+            try {
+                taskQueue = QueueFactory.createMessageQueue(10000, QueueType.BLOCKING_BACKOFF, null);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
             EventWorker priceWorker = new EventWorker(taskQueue);
             priceWorker.registerHandler(new VwapPriceEventHandler(priceStoreFactory, new VwapCalculator(config), config, publisher));
             return priceWorker;
@@ -131,8 +137,8 @@ class PriceServiceTest {
         timeProvider.setCurrentTime("10:00:00");
         assertEquals("10:00:00", timeProvider.getCurrentTime());
 
-        BlockingQueue<IndicatorEvent> indicatorEventArrayBlockingQueue = QueueFactory.createQueue(10000, QueueType.BACKOFF);
-        BlockingQueue<Event<Price>> priceEventArrayBlockingQueue = QueueFactory.createQueue(10000, QueueType.BACKOFF);
+        MessageQueue<IndicatorEvent> indicatorEventArrayBlockingQueue = QueueFactory.createMessageQueue(10000, QueueType.BLOCKING_BACKOFF, null);
+        MessageQueue<Event<Price>> priceEventArrayBlockingQueue = QueueFactory.createMessageQueue(10000, QueueType.BLOCKING_BACKOFF, null);
         MockPriceEventPublisher<IndicatorEvent> publisher = new MockPriceEventPublisher<>(indicatorEventArrayBlockingQueue);
 
         PricePublisher<Event<Price>> ignessPublisher = new PricePublisher<>(priceEventArrayBlockingQueue);
@@ -140,7 +146,12 @@ class PriceServiceTest {
         PriceStoreFactory priceStoreFactory = new PriceStoreFactory(StoreType.DEQUE, "test2");
 
         supplier = () -> {
-            BlockingQueue<PriceEvent> taskQueue = new ArrayBlockingQueue<>(1000);
+            MessageQueue<PriceEvent> taskQueue = null;
+            try {
+                taskQueue = QueueFactory.createMessageQueue(1000, QueueType.BLOCKING_BACKOFF, null);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
             EventWorker priceWorker = new EventWorker(taskQueue);
             priceWorker.registerHandler(new VwapPriceEventHandler(priceStoreFactory, new VwapCalculator(config), config, publisher));
             return priceWorker;

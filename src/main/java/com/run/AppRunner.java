@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import printer.SystemOutPrinter;
 import publisher.*;
+import queue.MessageQueue;
 import queue.QueueFactory;
 import queue.QueueType;
 import service.EventWorker;
@@ -58,7 +59,7 @@ public class AppRunner {
         CommandClient client = getCommandClient(cmdPriceFeeder);
         services.add(client);
 
-        BlockingQueue<Event<Price>> priceEventQueue = QueueFactory.createQueue(config.getQueueConfig().getCapacity(), QueueType.BACKOFF);
+        MessageQueue<Event<Price>> priceEventQueue = QueueFactory.createMessageQueue(config.getQueueConfig().getCapacity(), QueueType.DISRUPTOR_BACKOFF, null);
 
         PricePublisher<Event<Price>> publisher = new PricePublisher<>(priceEventQueue);
 
@@ -99,7 +100,8 @@ public class AppRunner {
         return priceAdaptor;
     }
 
-    private static PriceService getPriceService(BlockingQueue<Event<Price>> priceEventQueue, Config config, boolean testMode) {
+    private static PriceService getPriceService(MessageQueue<Event<Price>> priceEventQueue,
+                                                Config config, boolean testMode) {
         Publisher<IndicatorEvent> pricePublisher = getPublisher(testMode);
         PriceReader<Event<Price>> priceReader = new PriceReader<>(priceEventQueue);
 
@@ -110,7 +112,13 @@ public class AppRunner {
 
         Publisher<IndicatorEvent> finalPricePublisher = pricePublisher;
         DispatcherAgent<PriceEvent> dispatcherAgent = new DispatcherAgent<>(config.getDispatcherConfig().getThreads(), dispatchStrategy, () -> {
-            BlockingQueue<PriceEvent> taskQueue = new ArrayBlockingQueue<>(1000);
+            MessageQueue<PriceEvent> taskQueue = null;
+            try {
+                taskQueue = QueueFactory.createMessageQueue(10000, QueueType.BLOCKING_BACKOFF, null);
+            } catch (Exception e) {
+                logger.error("Error creating event Queue");
+            }
+
             EventWorker<PriceEvent> priceWorker = new EventWorker<>(taskQueue);
             priceWorker.registerHandler(new VwapPriceEventHandler(priceStoreFactory, new VwapCalculator(config), config, finalPricePublisher));
             return priceWorker;

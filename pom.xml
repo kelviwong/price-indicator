@@ -12,6 +12,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <disruptor.version>3.4.4</disruptor.version>
   </properties>
 
   <dependencies>
@@ -39,6 +40,11 @@
       <groupId>org.agrona</groupId>
       <artifactId>agrona</artifactId>
       <version>1.22.0</version>
+    </dependency>
+    <dependency>
+      <groupId>com.lmax</groupId>
+      <artifactId>disruptor</artifactId>
+      <version>${disruptor.version}</version>
     </dependency>
     <dependency>
       <groupId>org.hdrhistogram</groupId>

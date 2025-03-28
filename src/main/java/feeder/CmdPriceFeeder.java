@@ -12,7 +12,7 @@ public class CmdPriceFeeder extends AbstractQueueFeeder<String> {
 
     @Override
     public void pushData(String data) {
-        queue.offer(data);
+        queue.publish(data);
     }
 
     @Override
