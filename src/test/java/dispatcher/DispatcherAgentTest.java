@@ -12,8 +12,6 @@ import queue.QueueFactory;
 import queue.QueueType;
 import service.EventWorker;
 
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Supplier;
 
@@ -28,7 +26,7 @@ class DispatcherAgentTest {
 //            BlockingQueue<PriceEvent> taskQueue = new ArrayBlockingQueue<>(1000);
             MessageQueue<Event> messageQueue = null;
             try {
-                messageQueue = QueueFactory.createMessageQueue(1000, QueueType.AGRONA_BACKOFF, null);
+                messageQueue = QueueFactory.createMessageQueue(1000, QueueType.AGRONA_BACKOFF);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

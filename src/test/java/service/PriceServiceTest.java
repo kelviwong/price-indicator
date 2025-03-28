@@ -47,8 +47,8 @@ class PriceServiceTest {
 
     @BeforeEach
     public void seteach() throws Exception {
-        indicatorEventArrayBlockingQueue = QueueFactory.createMessageQueue(10000, QueueType.BLOCKING_BACKOFF, null);
-        priceEventArrayBlockingQueue = QueueFactory.createMessageQueue(10000, QueueType.BLOCKING_BACKOFF, null);
+        indicatorEventArrayBlockingQueue = QueueFactory.createMessageQueue(10000, QueueType.BLOCKING_BACKOFF);
+        priceEventArrayBlockingQueue = QueueFactory.createMessageQueue(10000, QueueType.BLOCKING_BACKOFF);
         publisher = new MockPriceEventPublisher<>(indicatorEventArrayBlockingQueue);
     }
 
@@ -74,7 +74,7 @@ class PriceServiceTest {
         supplier = () -> {
             MessageQueue<PriceEvent> taskQueue = null;
             try {
-                taskQueue = QueueFactory.createMessageQueue(10000, QueueType.BLOCKING_BACKOFF, null);
+                taskQueue = QueueFactory.createMessageQueue(10000, QueueType.BLOCKING_BACKOFF);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -137,8 +137,8 @@ class PriceServiceTest {
         timeProvider.setCurrentTime("10:00:00");
         assertEquals("10:00:00", timeProvider.getCurrentTime());
 
-        MessageQueue<IndicatorEvent> indicatorEventArrayBlockingQueue = QueueFactory.createMessageQueue(10000, QueueType.BLOCKING_BACKOFF, null);
-        MessageQueue<Event<Price>> priceEventArrayBlockingQueue = QueueFactory.createMessageQueue(10000, QueueType.BLOCKING_BACKOFF, null);
+        MessageQueue<IndicatorEvent> indicatorEventArrayBlockingQueue = QueueFactory.createMessageQueue(10000, QueueType.BLOCKING_BACKOFF);
+        MessageQueue<Event<Price>> priceEventArrayBlockingQueue = QueueFactory.createMessageQueue(10000, QueueType.BLOCKING_BACKOFF);
         MockPriceEventPublisher<IndicatorEvent> publisher = new MockPriceEventPublisher<>(indicatorEventArrayBlockingQueue);
 
         PricePublisher<Event<Price>> ignessPublisher = new PricePublisher<>(priceEventArrayBlockingQueue);
@@ -148,7 +148,7 @@ class PriceServiceTest {
         supplier = () -> {
             MessageQueue<PriceEvent> taskQueue = null;
             try {
-                taskQueue = QueueFactory.createMessageQueue(1000, QueueType.BLOCKING_BACKOFF, null);
+                taskQueue = QueueFactory.createMessageQueue(1000, QueueType.BLOCKING_BACKOFF);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
