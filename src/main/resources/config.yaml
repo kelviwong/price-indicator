@@ -1,6 +1,7 @@
 dispatcher:
   threads: 5
   dispatchType: ROUND_ROBIN
+  workerQueueType: AGRONA_BACKOFF
 
 vwap:
   vwapIntervalInMs: 3600000
@@ -10,3 +11,4 @@ priceService:
 
 queue:
   capacity: 10000
+  queueType: AGRONA_BACKOFF

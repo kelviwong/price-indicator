@@ -1,8 +1,11 @@
 package feeder;
 
+import config.Config;
+
 public class CmdPriceFeeder extends AbstractQueueFeeder<String> {
 
-    public CmdPriceFeeder() throws Exception {
+    public CmdPriceFeeder(Config config) throws Exception {
+        super(config);
     }
 
     @Override

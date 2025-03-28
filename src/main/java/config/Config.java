@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.yaml.snakeyaml.Yaml;
+import queue.QueueType;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -22,6 +23,7 @@ public class Config {
     public static class DispatcherConfig {
         private int threads;
         private DispatchType dispatchType;
+        private QueueType workerQueueType;
     }
 
     @Data
@@ -37,6 +39,7 @@ public class Config {
     @Data
     public static class QueueConfig {
         private int capacity;
+        private QueueType queueType;
     }
 
     private DispatcherConfig dispatcherConfig;
@@ -74,6 +77,7 @@ public class Config {
         DispatcherConfig dispatcherConfig = new DispatcherConfig();
         dispatcherConfig.setThreads((Integer) map.get("threads"));
         dispatcherConfig.setDispatchType(DispatchType.valueOf((String) map.get("dispatchType")));
+        dispatcherConfig.setWorkerQueueType(QueueType.valueOf((String) map.get("workerQueueType")));
         config.setDispatcherConfig(dispatcherConfig);
 
         map = (Map<String, Object>) obj.get("vwap");
@@ -89,6 +93,7 @@ public class Config {
         map = (Map<String, Object>) obj.get("queue");
         QueueConfig queueConfig = new QueueConfig();
         queueConfig.setCapacity((Integer) map.get("capacity"));
+        queueConfig.setQueueType(QueueType.valueOf((String) map.get("queueType")));
         config.setQueueConfig(queueConfig);
 
         return config;

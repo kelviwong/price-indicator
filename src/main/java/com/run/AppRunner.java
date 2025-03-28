@@ -30,15 +30,11 @@ import service.PriceService;
 import service.VwapPriceEventHandler;
 import util.ServiceUtil;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 
 public class AppRunner {
-
     private static final Logger logger = LoggerFactory.getLogger(LogPublisher.class);
     private static ITimeProviderFactory timeProviderFactory;
     private static TimeProvider timeProvider;
@@ -51,7 +47,7 @@ public class AppRunner {
         Config config = Config.loadConfig("config.yaml");
         logger.info("Loaded config: " + config);
 
-        AbstractQueueFeeder<String> cmdPriceFeeder = new CmdPriceFeeder();
+        AbstractQueueFeeder<String> cmdPriceFeeder = new CmdPriceFeeder(config);
 
         timeProviderFactory = new NanoTimeProviderFactory();
         timeProvider = timeProviderFactory.get();
@@ -59,7 +55,11 @@ public class AppRunner {
         CommandClient client = getCommandClient(cmdPriceFeeder);
         services.add(client);
 
-        MessageQueue<Event<Price>> priceEventQueue = QueueFactory.createMessageQueue(config.getQueueConfig().getCapacity(), QueueType.DISRUPTOR_BACKOFF, null);
+        MessageQueue<Event<Price>> priceEventQueue =
+                QueueFactory.createMessageQueue(
+                        config.getQueueConfig().getCapacity(),
+                        config.getQueueConfig().getQueueType()
+                );
 
         PricePublisher<Event<Price>> publisher = new PricePublisher<>(priceEventQueue);
 
@@ -111,18 +111,19 @@ public class AppRunner {
         DispatchStrategy dispatchStrategy = config.getDispatcherConfig().getDispatchType() == DispatchType.BY_SYMBOL ? new HashSymbolDispatchStrategy() : new RoundRobinDispatchStrategy();
 
         Publisher<IndicatorEvent> finalPricePublisher = pricePublisher;
-        DispatcherAgent<PriceEvent> dispatcherAgent = new DispatcherAgent<>(config.getDispatcherConfig().getThreads(), dispatchStrategy, () -> {
-            MessageQueue<PriceEvent> taskQueue = null;
-            try {
-                taskQueue = QueueFactory.createMessageQueue(10000, QueueType.BLOCKING_BACKOFF, null);
-            } catch (Exception e) {
-                logger.error("Error creating event Queue");
-            }
+        DispatcherAgent<PriceEvent> dispatcherAgent = new DispatcherAgent<>(config.getDispatcherConfig().getThreads(), dispatchStrategy,
+                () -> {
+                    MessageQueue<PriceEvent> taskQueue = null;
+                    try {
+                        taskQueue = QueueFactory.createMessageQueue(10000, config.getQueueConfig().getQueueType());
+                    } catch (Exception e) {
+                        logger.error("Error creating event Queue");
+                    }
 
-            EventWorker<PriceEvent> priceWorker = new EventWorker<>(taskQueue);
-            priceWorker.registerHandler(new VwapPriceEventHandler(priceStoreFactory, new VwapCalculator(config), config, finalPricePublisher));
-            return priceWorker;
-        });
+                    EventWorker<PriceEvent> priceWorker = new EventWorker<>(taskQueue);
+                    priceWorker.registerHandler(new VwapPriceEventHandler(priceStoreFactory, new VwapCalculator(config), config, finalPricePublisher));
+                    return priceWorker;
+                });
 
         PriceService priceService = new PriceService(priceReader, dispatcherAgent);
         priceService.start();

@@ -1,5 +1,6 @@
 package feeder;
 
+import config.Config;
 import data.Event;
 import data.Price;
 import queue.MessageQueue;
@@ -11,8 +12,7 @@ import java.util.concurrent.BlockingQueue;
 public abstract class AbstractQueueFeeder<T> implements PriceFeeder<T> {
     protected MessageQueue<T> queue;
 
-    public AbstractQueueFeeder() throws Exception {
-        this.queue = QueueFactory.createMessageQueue(10000, QueueType.AGRONA_BACKOFF, null);
-        ;
+    public AbstractQueueFeeder(Config config) throws Exception {
+        this.queue = QueueFactory.createMessageQueue(10000, config.getQueueConfig().getQueueType());
     }
 }

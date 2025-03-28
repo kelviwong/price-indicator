@@ -36,6 +36,7 @@ public class LatencyTracker {
     public void showStats() {
         logger.info("=== Latency ===");
         logger.info("P99 : {} us", histogram.getValueAtPercentile(99.0) / 1_000);
+        logger.info("P99.9 : {} us", histogram.getValueAtPercentile(99.9) / 1_000);
         logger.info("Max : {} us", histogram.getMaxValue() / 1_000);
         logger.info("total records : {}", histogram.getTotalCount());
 

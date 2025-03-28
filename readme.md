@@ -65,7 +65,15 @@ Build:
 3. adjust the time and price.
 
 Misc
-2025-03-28 10:12:39 [main] INFO  publisher.LatencyPublisher - === Latency ===
-2025-03-28 10:12:39 [main] INFO  publisher.LatencyPublisher - P99 : 81 us
-2025-03-28 10:12:39 [main] INFO  publisher.LatencyPublisher - Max : 10977 us
-2025-03-28 10:12:39 [main] INFO  publisher.LatencyPublisher - total records : 12805
+BlockingQueue
+2025-03-28 19:58:34 [main] INFO  publisher.LatencyPublisher - === Latency ===
+2025-03-28 19:58:34 [main] INFO  publisher.LatencyPublisher - P99 : 85 us
+2025-03-28 19:58:34 [main] INFO  publisher.LatencyPublisher - P99.9 : 404 us
+2025-03-28 19:58:34 [main] INFO  publisher.LatencyPublisher - Max : 5533 us
+2025-03-28 19:58:34 [main] INFO  publisher.LatencyPublisher - total records : 22809
+Argona
+2025-03-28 19:56:00 [main] INFO  publisher.LatencyPublisher - === Latency ===
+2025-03-28 19:56:00 [main] INFO  publisher.LatencyPublisher - P99 : 36 us
+2025-03-28 19:56:00 [main] INFO  publisher.LatencyPublisher - P99.9 : 71 us
+2025-03-28 19:56:00 [main] INFO  publisher.LatencyPublisher - Max : 1862 us
+2025-03-28 19:56:00 [main] INFO  publisher.LatencyPublisher - total records : 22802

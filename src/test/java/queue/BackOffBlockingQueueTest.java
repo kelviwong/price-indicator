@@ -22,7 +22,7 @@ class BackOffBlockingQueueTest {
     public void setUp() throws Exception {
         timeProvider = new MockTimeProvider();
         BackOffStrategy<PriceEvent> strategy = new RetryThenDropStrategy<>(3, 100, new LogDropConsumer<>());
-        backOffBlockingQueue = QueueFactory.createMessageQueue(1, QueueType.BLOCKING_BACKOFF, null, strategy);
+        backOffBlockingQueue = QueueFactory.createMessageQueue(1, QueueType.BLOCKING_BACKOFF, strategy);
     }
 
     @Test
@@ -70,7 +70,7 @@ class BackOffBlockingQueueTest {
         BackOffStrategy<PriceEvent> strategy = new RetryThenDropStrategy<>(3, 100, item -> {
             dropped.set(true);
         });
-        backOffBlockingQueue = QueueFactory.createMessageQueue(1, QueueType.BLOCKING_BACKOFF, null, strategy);
+        backOffBlockingQueue = QueueFactory.createMessageQueue(1, QueueType.BLOCKING_BACKOFF, strategy);
 
         backOffBlockingQueue.publish(priceEvent);
         // offer again but full

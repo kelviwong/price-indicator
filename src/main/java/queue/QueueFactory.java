@@ -13,25 +13,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 
 public class QueueFactory {
     private static final Logger logger = LoggerFactory.getLogger(QueueFactory.class);
-
-//    public static <T> BlockingQueue<T> createQueue(int size, QueueType type, BackOffStrategy<T> strategy) throws Exception {
-//        if (type == QueueType.BLOCKING_BACKOFF) {
-//            return new BackOffBlockingQueue<T>(size, strategy);
-//        }
-//
-//        return new ArrayBlockingQueue<>(size);
-//    }
-//
-//    public static <T> BlockingQueue<T> createQueue(int size, QueueType type) throws Exception {
-//        logger.info("Creating queue with type {}, {}", type, size);
-//        if (type == QueueType.BLOCKING_BACKOFF) {
-//            return createQueue(size, type, new RetryThenDropStrategy<>(3, 100, new LogDropConsumer<T>()));
-//        }
-//
-//        return new ArrayBlockingQueue<>(size);
-//    }
-
-    public static <T> MessageQueue<T> createMessageQueue(int size, QueueType type, Disruptor<T> disruptor, BackOffStrategy<T> strategy) throws Exception {
+    public static <T> MessageQueue<T> createMessageQueue(int size, QueueType type, BackOffStrategy<T> strategy) throws Exception {
         QueueWriter<T> queueWriter;
 //        if (type == QueueType.DISRUPTOR_BACKOFF) {
 //            queueWriter = new DisruptorWriter<>(disruptor);
@@ -50,14 +32,14 @@ public class QueueFactory {
             queueWriter = new BlockingQueueWriter<>(queue);
         }
 
-        logger.info("Creating MessageQueue: {}, {},{} ,{} ", size, type, strategy, disruptor);
+        logger.info("Creating MessageQueue: {}, {},{} ,{} ", size, type, strategy, queueWriter);
 
         return new MessageQueue<T>(queueWriter, strategy);
     }
 
-    public static <T> MessageQueue<T> createMessageQueue(int size, QueueType type, Disruptor<T> disruptor) throws Exception {
+    public static <T> MessageQueue<T> createMessageQueue(int size, QueueType type) throws Exception {
         BackOffStrategy<T> retryThenDropStrategy = new RetryThenDropStrategy<>(3, 100, new LogDropConsumer<>());
-        return createMessageQueue(size, type, disruptor, retryThenDropStrategy);
+        return createMessageQueue(size, type, retryThenDropStrategy);
     }
 
 }

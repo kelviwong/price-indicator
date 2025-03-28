@@ -78,6 +78,7 @@ public class SimpleTester {
                 latch.countDown();
             } catch (Exception e) {
                 System.out.println("No data found");
+                e.printStackTrace();
                 throw new RuntimeException("This is the end.");
             }
 //        }, 0, 20, TimeUnit.MICROSECONDS);
