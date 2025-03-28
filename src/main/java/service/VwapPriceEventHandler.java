@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import publisher.PooledPublisher;
 import publisher.Publisher;
 import storage.IStore;
+import util.ObjectPool;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -22,6 +23,7 @@ public class VwapPriceEventHandler implements EventHandler<PriceEvent> {
     private final ICalculator calculator;
     private Config config;
     private Publisher<IndicatorEvent> publisher;
+    private ObjectPool<IndicatorEvent> eventStore;
 
     public VwapPriceEventHandler(
             PriceStoreFactory priceStoreFactory, ICalculator calculator, Config config, Publisher<IndicatorEvent> publisher) {
@@ -31,6 +33,7 @@ public class VwapPriceEventHandler implements EventHandler<PriceEvent> {
         this.publisher = publisher;
         this.currencyPriceVolMap = new HashMap<>();
         this.analyticDataMap = new HashMap<>();
+        this.eventStore = new ObjectPool<>(1000, () -> new IndicatorEvent());
     }
 
     @Override
@@ -51,12 +54,13 @@ public class VwapPriceEventHandler implements EventHandler<PriceEvent> {
             analyticDataMap.put(currency, analyticData);
         }
 
-        IndicatorEvent indicatorEvent;
-        if (publisher instanceof PooledPublisher) {
-            indicatorEvent = ((PooledPublisher<IndicatorEvent>) publisher).acquire();
-        } else {
-            indicatorEvent = new IndicatorEvent();
-        }
+//        IndicatorEvent indicatorEvent;
+//        if (publisher instanceof PooledPublisher) {
+//            indicatorEvent = ((PooledPublisher<IndicatorEvent>) publisher).acquire();
+//        } else {
+//            indicatorEvent = new IndicatorEvent();
+//        }
+        IndicatorEvent indicatorEvent = eventStore.acquire();
         indicatorEvent.setData(analyticData);
         LatencyTracker.copyStartNs(event, indicatorEvent);
 
@@ -67,6 +71,7 @@ public class VwapPriceEventHandler implements EventHandler<PriceEvent> {
         if (analyticData.getVwap() > 0 && expiredTimeInMills >= analyticData.getFirstDataTime()) {
             // TODO: should make this serialize publisher in another thread queue
             publisher.publish(indicatorEvent);
+            eventStore.release(indicatorEvent);
         }
     }
 }
