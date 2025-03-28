@@ -36,6 +36,9 @@ public class PriceAdaptor implements IService, IAdaptor {
     @Override
     public void process() throws Exception {
         String data = feeder.getData();
+        if (data == null) {
+            return;
+        }
         Event<Price> event = eventFactory.getEvent(EventType.PRICE);
         Price price = feedHandler.process(data);
         event.setData(price);
