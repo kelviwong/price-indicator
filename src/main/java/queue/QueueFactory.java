@@ -1,7 +1,5 @@
 package queue;
 
-import com.lmax.disruptor.dsl.Disruptor;
-import data.Event;
 import org.agrona.concurrent.AbstractConcurrentArrayQueue;
 import org.agrona.concurrent.BackoffIdleStrategy;
 import org.agrona.concurrent.IdleStrategy;
@@ -15,9 +13,6 @@ public class QueueFactory {
     private static final Logger logger = LoggerFactory.getLogger(QueueFactory.class);
     public static <T> MessageQueue<T> createMessageQueue(int size, QueueType type, BackOffStrategy<T> strategy) throws Exception {
         QueueWriter<T> queueWriter;
-//        if (type == QueueType.DISRUPTOR_BACKOFF) {
-//            queueWriter = new DisruptorWriter<>(disruptor);
-//        } else if (type == QueueType.AGRONA_BACKOFF) {
         if (type == QueueType.AGRONA_BACKOFF) {
             AbstractConcurrentArrayQueue<T> queue = new ManyToOneConcurrentArrayQueue<>(size);
             IdleStrategy idleStrategy = new BackoffIdleStrategy(
